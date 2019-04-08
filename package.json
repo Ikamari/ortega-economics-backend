@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node app/index.js"
+    "start": "NODE_ENV=prod node app/server.js",
+    "start_win": "set NODE_ENV=prod&& node app/server.js",
+    "watch": "NODE_ENV=dev nodemon app/server.js localhost 3000",
+    "watch_win": "set NODE_ENV=dev&& nodemon app/server.js localhost 3000"
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/Ikamari/ortega-economics-backend/issues"
   },
-  "homepage": "https://github.com/Ikamari/ortega-economics-backend#readme"
+  "homepage": "https://github.com/Ikamari/ortega-economics-backend#readme",
+  "dependencies": {
+    "mongodb": "^3.2.2",
+    "nodemon": "^1.18.10"
+  }
 }
