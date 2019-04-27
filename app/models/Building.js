@@ -1,11 +1,16 @@
 // Database
 const { Schema, model } = require("mongoose");
+// Models
+const Fraction = require("./Fraction");
+const ResourceModel = require("./Resource");
 // Schemas
-const Resource = require("../schemas/Resource");
+const ResourceSchema = require("../schemas/Resource");
+// Validators
+const { exists } = require("../validators/General");
 
 const resourceTurnoverSchema = new Schema({
     resource_id: {
-        // todo: add id validation
+        validate: exists(ResourceModel),
         type: Schema.Types.ObjectId,
         required: true
     },
@@ -21,9 +26,9 @@ const resourceTurnoverSchema = new Schema({
     }
 });
 
-module.exports = model("Building", new Schema({
+const BuildingModel = model("Building", new Schema({
     fraction_id: {
-        // todo: add id validation
+        validate: exists(Fraction),
         type: Schema.Types.ObjectId,
         default: null
     },
@@ -42,6 +47,11 @@ module.exports = model("Building", new Schema({
         required: true,
         default: 0
     },
+    resources: {
+        type: [ResourceSchema],
+        required: true,
+        default: []
+    },
     produced_resources: {
         type: [resourceTurnoverSchema],
         required: true,
@@ -58,3 +68,5 @@ module.exports = model("Building", new Schema({
         default: 0
     }
 }));
+
+module.exports = BuildingModel;

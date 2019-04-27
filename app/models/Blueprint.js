@@ -1,9 +1,14 @@
 // Database
 const { Schema, model } = require("mongoose");
+// Models
+const Facility = require("./Facility");
+const Perk = require("./Perk");
 // Schemas
 const Resource = require("../schemas/Resource");
+// Validators
+const { exists } = require("../validators/General");
 
-module.exports = model("Blueprint", new Schema({
+const BlueprintModel = model("Blueprint", new Schema({
     name: {
         type: String,
         required: true
@@ -23,15 +28,22 @@ module.exports = model("Blueprint", new Schema({
         default: []
     },
     required_facilities: {
-        // todo: add id validation
+        validate: exists(Facility),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
     },
     required_perks: {
-        // todo: add id validation
+        validate: exists(Perk),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
+    },
+    is_public: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 }));
+
+module.exports = BlueprintModel;

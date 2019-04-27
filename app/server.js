@@ -1,10 +1,8 @@
 // Server
-const server = require("./controller");
+const app = require("./app");
 const { configProps, getConfigProp } = require("./config");
 // Database
 const mongoose = require("mongoose");
-// Test
-const Fraction = require("./models/Fraction");
 
 const hostname = configProps[process.env.NODE_ENV].hostname;
 const port     = configProps[process.env.NODE_ENV].port;
@@ -12,10 +10,6 @@ const port     = configProps[process.env.NODE_ENV].port;
 const onDBConnectionSuccess = () => {
     global.isReady = true;
     console.log("Successfully connected to DB");
-
-    (new Fraction({ name: "Dudes" })).save();
-
-    console.log(global.config("mongodb.db"))
 };
 
 const onDBConnectionError = (error) => {
@@ -23,7 +17,7 @@ const onDBConnectionError = (error) => {
     process.exit();
 };
 
-server.listen(port, hostname, () => {
+const server = app.listen(port, hostname, () => {
     global.isReady     = false;
     global.configProps = configProps;
     global.config      = getConfigProp;
@@ -38,5 +32,5 @@ server.listen(port, hostname, () => {
     global.db.on("error", (error) => onDBConnectionError(error));
     global.db.once("open", () => onDBConnectionSuccess());
 
-    console.log(`Server running at http://${hostname}:${port}/`);
+    console.log(`Server running on http://${hostname}:${port}/`);
 });

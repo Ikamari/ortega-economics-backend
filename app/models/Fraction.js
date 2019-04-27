@@ -1,7 +1,11 @@
 // Database
 const { Schema, model } = require("mongoose");
+// Models
+const Trait = require("./Trait");
 // Schemas
 const Resource = require("../schemas/Resource");
+// Validators
+const { exists } = require("../validators/General");
 
 const squadSchema = new Schema({
     name: {
@@ -26,7 +30,7 @@ const squadSchema = new Schema({
     }
 });
 
-module.exports = model("Fraction", new Schema({
+const FractionModel = model("Fraction", new Schema({
     name: {
         type: String,
         required: true,
@@ -38,14 +42,17 @@ module.exports = model("Fraction", new Schema({
         default: []
     },
     traits: {
-        // todo: add id validation
+        validate: exists(Trait),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
     },
-    resources: {
-        type: [Resource],
-        required: true,
-        default: []
-    }
+    // resources: {
+    //     // todo: show contents of all buildings
+    //     type: [Resource],
+    //     required: true,
+    //     default: []
+    // }
 }));
+
+module.exports = FractionModel;

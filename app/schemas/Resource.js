@@ -1,9 +1,13 @@
 // Database
 const { Schema } = require("mongoose");
+// Models
+const Resource = require("../models/Resource");
+// Validators
+const { exists } = require("../validators/General");
 
 module.exports = new Schema({
     resource_id: {
-        // todo: add id validation
+        validate: exists(Resource),
         type: Schema.Types.ObjectId,
         required: true
     },
