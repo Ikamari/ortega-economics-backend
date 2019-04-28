@@ -2,11 +2,26 @@
 const express = require("express");
 // Admin Controllers
 const {
-    ResourceController: ResourceAdminController,
-} = require("./controllers/admin/index");
+    BlueprintController: BlueprintAdminController,
+    BuildingController:  BuildingAdminController,
+    FacilityController:  FacilityAdminController,
+    FractionController:  FractionAdminController,
+    PerkController:      PerkAdminController,
+    PlayerController:    PlayerAdminController,
+    ResourceController:  ResourceAdminController,
+    TraitController:     TraitAdminController
+} = require("./controllers/admin");
 
 const app = express();
+
 // Admin controllers
+app.use("/admin/blueprints", BlueprintAdminController);
+app.use("/admin/buildings", BuildingAdminController);
+app.use("/admin/facilities", FacilityAdminController);
+app.use("/admin/fractions", FractionAdminController);
+app.use("/admin/perks", PerkAdminController);
+app.use("/admin/players", PlayerAdminController);
 app.use("/admin/resources", ResourceAdminController);
+app.use("/admin/traits", TraitAdminController);
 
 module.exports = app;
