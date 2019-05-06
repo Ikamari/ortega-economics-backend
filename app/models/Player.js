@@ -1,8 +1,8 @@
 // Database
 const { Schema, model } = require("mongoose");
 // Models
-const Fraction = require("./Fraction");
-const Perk = require("./Perk");
+const FractionModel = require("./Fraction");
+const PerkModel     = require("./Perk");
 // Validators
 const { exists } = require("../validators/General");
 
@@ -13,12 +13,12 @@ const PlayerModel = model("Player", new Schema({
         unique: true
     },
     fraction_id: {
-        validate: exists(Fraction),
+        validate: exists(FractionModel),
         type: Schema.Types.ObjectId,
         default: null
     },
     perks: {
-        validate: exists(Perk),
+        validate: exists(PerkModel),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []

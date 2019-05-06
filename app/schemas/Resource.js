@@ -1,13 +1,13 @@
 // Database
 const { Schema } = require("mongoose");
 // Models
-const Resource = require("../models/Resource");
+const ResourceModel = require("../models/Resource");
 // Validators
 const { exists } = require("../validators/General");
 
-module.exports = new Schema({
-    resource_id: {
-        validate: exists(Resource),
+const ResourceSchema = new Schema({
+    _id: {
+        validate: exists(ResourceModel),
         type: Schema.Types.ObjectId,
         required: true
     },
@@ -17,3 +17,5 @@ module.exports = new Schema({
         default: 0
     }
 });
+
+module.exports = ResourceSchema;

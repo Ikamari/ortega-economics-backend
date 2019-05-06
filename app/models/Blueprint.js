@@ -1,21 +1,23 @@
 // Database
 const { Schema, model } = require("mongoose");
 // Models
-const Facility = require("./Facility");
-const Perk = require("./Perk");
+const FacilityModel  = require("./Facility");
+const PerkModel      = require("./Perk");
 // Schemas
-const Resource = require("../schemas/Resource");
+const ResourceSchema = require("../schemas/Resource");
 // Validators
 const { exists } = require("../validators/General");
 
 const BlueprintModel = model("Blueprint", new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        default: "Unnamed"
     },
     quality: {
         type: Number,
-        required: true
+        required: true,
+        default: 0
     },
     craft_time: {
         type: Number,
@@ -23,18 +25,18 @@ const BlueprintModel = model("Blueprint", new Schema({
         default: 0
     },
     required_resources: {
-        type: [Resource],
+        type: [ResourceSchema],
         required: true,
         default: []
     },
     required_facilities: {
-        validate: exists(Facility),
+        validate: exists(FacilityModel),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
     },
     required_perks: {
-        validate: exists(Perk),
+        validate: exists(PerkModel),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []

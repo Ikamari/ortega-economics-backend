@@ -1,95 +1,75 @@
 // Server
 const express    = require("express");
 const bodyParser = require("body-parser");
-// Database
-const mongoose = require("mongoose");
+// Controller foundation
+const Controller = require("../Controller");
 
-const createObjectId = (request, response) => {
-    try {
-        return mongoose.Types.ObjectId(request.params.id)
+class AdminController extends Controller {
+
+    createRoutes(router, Model) {
+        router.get("/", (request, response) => {
+            Model.find({}, (error, documents) => {
+                if (error) {
+                    return response.status(500).send(`Can't get documents of ${Model.collection.collectionName} collection: ${error.message}`);
+                }
+                response.status(200).send(request.params.id ? documents[0] : documents);
+            })
+        });
+
+        router.get("/:id", (request, response) => {
+            Model.findById(request.params.id, (error, document) => {
+                if (error) {
+                    return response.status(500).send(`Can't get specified document of ${Model.collection.collectionName} collection: ${error.message}`);
+                }
+                if (!document) {
+                    return response.status(500).send(`Can't find document of ${Model.collection.collectionName} collection with specified id`);
+                }
+                response.status(200).send(document);
+            })
+        });
+
+        router.post("/", (request, response) => {
+            Model.create(request.body, (error, document) => {
+                if (error) {
+                    return response.status(500).send(`Can't create new document of ${Model.collection.collectionName} collection: ${error.message}`);
+                }
+                response.status(200).send(document);
+            })
+        });
+
+        router.patch("/:id", (request, response) => {
+            Model.findByIdAndUpdate(request.params.id, request.body, (error, document) => {
+                if (error) {
+                    return response.status(500).send(`Can't update specified document of ${Model.collection.collectionName} collection: ${error.message}`);
+                }
+                if (!document) {
+                    return response.status(500).send(`Can't find document of ${Model.collection.collectionName} collection with specified id`);
+                }
+                response.status(200).send(document);
+            })
+        });
+
+        router.delete("/:id", (request, response) => {
+            Model.findByIdAndDelete(request.params.id, (error, document) => {
+                if (error) {
+                    return response.status(500).send(`Can't delete specified document of ${Model.collection.collectionName} collection: ${error.message}`);
+                }
+                if (!document) {
+                    return response.status(500).send(`Can't find document of ${Model.collection.collectionName} collection with specified id`);
+                }
+                response.status(200).send(document);
+            })
+        });
     }
-    catch {
-        response.status(500).send(`Can't create ObjectId from specified id`);
-        return false
+
+    getRouter(Model) {
+        const router = express.Router();
+        router.use(bodyParser.urlencoded({extended: true}));
+        router.use(bodyParser.json());
+        this.createRoutes(router, Model);
+        return router;
     }
-};
 
-const createAdminController = (Model) => {
-    const router = express.Router();
+}
 
-    router.use(bodyParser.urlencoded({extended: true}));
-    router.use(bodyParser.json());
-
-    router.get("/", (request, response) => {
-        Model.find({}, (error, resources) => {
-            if (error) {
-                return response.status(500).send(`Can't get documents of ${Model.collection.collectionName} collection: ${error.message}`);
-            }
-            response.status(200).send(request.params.id ? resources[0] : resources);
-        })
-    });
-
-    router.get("/:id", (request, response) => {
-        let objectId;
-        if (!(objectId = createObjectId(request, response))) {
-            return
-        }
-
-        Model.find({ _id: objectId }, (error, resources) => {
-            if (error) {
-                return response.status(500).send(`Can't get specified document of ${Model.collection.collectionName} collection: ${error.message}`);
-            }
-            if (!resources.length) {
-                return response.status(500).send(`Can't find document of ${Model.collection.collectionName} collection with specified id`);
-            }
-            response.status(200).send(request.params.id ? resources[0] : resources);
-        })
-    });
-
-    router.post("/", (request, response) => {
-        Model.create(request.body, (error, resource) => {
-            if (error) {
-                return response.status(500).send(`Can't create new document of ${Model.collection.collectionName} collection: ${error.message}`);
-            }
-            response.status(200).send(resource);
-        })
-    });
-
-    router.patch("/:id", (request, response) => {
-        let objectId;
-        if (!(objectId = createObjectId(request, response))) {
-            return
-        }
-
-        Model.findByIdAndUpdate(objectId, request.body, (error, resource) => {
-            if (error) {
-                return response.status(500).send(`Can't update specified document of ${Model.collection.collectionName} collection: ${error.message}`);
-            }
-            if (!resource.length) {
-                return response.status(500).send(`Can't find document of ${Model.collection.collectionName} collection with specified id`);
-            }
-            response.status(200).send(resource);
-        })
-    });
-
-    router.delete("/:id", (request, response) => {
-        let objectId;
-        if (!(objectId = createObjectId(request, response))) {
-            return
-        }
-
-        Model.findByIdAndDelete(objectId, (error, resource) => {
-            if (error) {
-                return response.status(500).send(`Can't delete specified document of ${Model.collection.collectionName} collection: ${error.message}`);
-            }
-            if (!resource.length) {
-                return response.status(500).send(`Can't find document of ${Model.collection.collectionName} collection with specified id`);
-            }
-            response.status(200).send(resource);
-        })
-    });
-
-    return router
-};
-
-module.exports = createAdminController;
+module.exports = AdminController;

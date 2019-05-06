@@ -1,14 +1,14 @@
 // Database
 const { Schema, model } = require("mongoose");
 // Models
-const Fraction = require("./Fraction");
+const FractionModel = require("./Fraction");
 const ResourceModel = require("./Resource");
 // Schemas
 const ResourceSchema = require("../schemas/Resource");
 // Validators
 const { exists } = require("../validators/General");
 
-const resourceTurnoverSchema = new Schema({
+const ResourceTurnoverSchema = new Schema({
     resource_id: {
         validate: exists(ResourceModel),
         type: Schema.Types.ObjectId,
@@ -28,9 +28,14 @@ const resourceTurnoverSchema = new Schema({
 
 const BuildingModel = model("Building", new Schema({
     fraction_id: {
-        validate: exists(Fraction),
+        validate: exists(FractionModel),
         type: Schema.Types.ObjectId,
         default: null
+    },
+    name: {
+        type: String,
+        required: true,
+        default: "Unnamed"
     },
     available_workplaces: {
         type: Number,
@@ -42,23 +47,26 @@ const BuildingModel = model("Building", new Schema({
         required: true,
         default: 0
     },
+    // Todo: Check size when trying to add something
     storage_size: {
         type: Number,
         required: true,
         default: 0
     },
     resources: {
-        type: [ResourceSchema],
+        type: Map,
+        of: Number,
+        required: true,
+        default: {},
+        validate: exists(ResourceModel)
+    },
+    produces: {
+        type: [ResourceTurnoverSchema],
         required: true,
         default: []
     },
-    produced_resources: {
-        type: [resourceTurnoverSchema],
-        required: true,
-        default: []
-    },
-    consumed_resources: {
-        type: [resourceTurnoverSchema],
+    consumes: {
+        type: [ResourceTurnoverSchema],
         required: true,
         default: []
     },
