@@ -26,5 +26,5 @@ module.exports.exists = (Model) => ({
             return amount >= condition;
         });
     },
-    message: props => `${props.path} must point to existing ${Model.modelName}'`
+    message: props => `${props.path} must point to existing ${Model.modelName}`
 });

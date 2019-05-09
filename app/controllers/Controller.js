@@ -1,6 +1,5 @@
 // Server
-const express    = require("express");
-const bodyParser = require("body-parser");
+const express = require("express");
 
 class Controller {
 
@@ -8,8 +7,6 @@ class Controller {
 
     getRouter() {
         const router = express.Router();
-        router.use(bodyParser.urlencoded({extended: true}));
-        router.use(bodyParser.json());
         this.createRoutes(router);
         return router;
     }

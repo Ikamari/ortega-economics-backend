@@ -26,7 +26,7 @@ const ResourceTurnoverSchema = new Schema({
     }
 });
 
-const BuildingModel = model("Building", new Schema({
+const BuildingSchema = new Schema({
     fraction_id: {
         validate: exists(FractionModel),
         type: Schema.Types.ObjectId,
@@ -47,11 +47,17 @@ const BuildingModel = model("Building", new Schema({
         required: true,
         default: 0
     },
-    // Todo: Check size when trying to add something
     storage_size: {
         type: Number,
         required: true,
-        default: 0
+        default: 0,
+        min: 0
+    },
+    used_storage: {
+        type: Number,
+        required: true,
+        default: 0,
+        min: 0
     },
     resources: {
         type: Map,
@@ -75,6 +81,54 @@ const BuildingModel = model("Building", new Schema({
         required: true,
         default: 0
     }
-}));
+});
+
+BuildingSchema.methods.editResources = function (resources, strictCheck = true) {
+    let newUsedStorage = 0;
+
+    // Add or remove specified resources
+    resources.map((resource) => {
+        let newAmount = 0;
+        if (this.resources.has(resource._id)) {
+            newAmount = this.resources.get(resource._id) + resource.amount;
+            this.resources.set(resource._id, newAmount)
+        } else {
+            newAmount = resource.amount;
+            this.resources.set(resource._id, newAmount)
+        }
+        newUsedStorage += newAmount;
+    });
+
+    // Storage mustn't be overflowed
+    if (newUsedStorage > this.storage_size) {
+        throw new Error(`Storage will be overflowed (new: ${newUsedStorage} > max: ${this.storage_size})`);
+    }
+
+    // Amount of resources must be >= 0
+    this.resources.forEach((amount, resourceId) => {
+        if (amount < 0) {
+            if (strictCheck) {
+                throw new Error("Amount of specific resource cannot be negative");
+            } else {
+                newUsedStorage += Math.abs(this.resources.get(resourceId));
+                this.resources.set(resourceId, 0)
+            }
+        }
+    });
+
+    // Used storage size cannot be negative
+    if (newUsedStorage < 0) {
+        throw new Error("Used storage size cannot be negative");
+    }
+
+    this.used_storage = newUsedStorage;
+    return this.save();
+};
+
+BuildingSchema.methods.editResource = function (resource, strictCheck = true) {
+    return this.editResources(resource, strictCheck)
+};
+
+const BuildingModel = model("Building", BuildingSchema);
 
 module.exports = BuildingModel;
