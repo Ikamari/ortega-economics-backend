@@ -1,8 +1,6 @@
 // Database
 const { Schema, model } = require("mongoose");
-// Models
-const FacilityModel  = require("./Facility");
-const PerkModel      = require("./Perk");
+const Int32             = require("mongoose-int32");
 // Schemas
 const ResourceSchema = require("../schemas/Resource");
 // Validators
@@ -15,7 +13,7 @@ const BlueprintModel = model("Blueprint", new Schema({
         default: "Unnamed"
     },
     quality: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0
     },
@@ -30,13 +28,13 @@ const BlueprintModel = model("Blueprint", new Schema({
         default: []
     },
     required_facilities: {
-        validate: exists(FacilityModel),
+        validate: exists(model("Facility")),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
     },
     required_perks: {
-        validate: exists(PerkModel),
+        validate: exists(model("Perk")),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []

@@ -1,7 +1,6 @@
 // Database
 const { Schema, model } = require("mongoose");
-// Models
-const TraitModel    = require("./Trait");
+const Int32             = require("mongoose-int32");
 // Validators
 const { exists } = require("../validators/General");
 
@@ -11,17 +10,17 @@ const SquadSchema = new Schema({
         required: true
     },
     quantity: {
-        type: Number,
+        type: Int32,
         default: 0,
         required: true
     },
     experience_level: {
-        type: Number,
+        type: Int32,
         default: 0,
         required: true
     },
     gear_level: {
-        type: Number,
+        type: Int32,
         default: 0,
         required: true
     },
@@ -44,18 +43,16 @@ const FractionSchema = new Schema({
         default: []
     },
     traits: {
-        validate: exists(TraitModel),
+        validate: exists(model("Trait")),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
-    },
-    // todo: show all fraction members
+    }
 });
 
 // Get resources from all fraction's buildings
 FractionSchema.virtual("resources").get(async function() {
-    // TODO: Check whether it's ok that require("./Building") should be used
-    const buildings = await require("./Building").find({ fraction_id: this._id });
+    const buildings = await model("Building").find({ fraction_id: this._id });
 
     let resources = {};
     buildings.map((building) => {
@@ -71,10 +68,30 @@ FractionSchema.virtual("resources").get(async function() {
     return resources;
 });
 
+// Get overall info about free/available storage space in buildings of fraction
+FractionSchema.virtual("storage").get(async function() {
+    const buildings = await model("Building").find({ fraction_id: this._id });
+
+    let storage = {
+        storage_size: 0,
+        used_storage: 0
+    };
+    buildings.map((building) => {
+        storage.storage_size += building.storage_size;
+        storage.used_storage += building.used_storage;
+    });
+
+    return storage;
+});
+
 // Get all fraction members
 FractionSchema.virtual("members").get(async function() {
-    // TODO: Check whether it's ok that require("./Player") should be used
-    return await require("./Player").find({ fraction_id: this._id });
+    return await model("Player").find({ fraction_id: this._id });
+});
+
+// Get all fraction buildings
+FractionSchema.virtual("buildings").get(async function() {
+    return await model("Building").find({ fraction_id: this._id });
 });
 
 const FractionModel = model("Fraction", FractionSchema);

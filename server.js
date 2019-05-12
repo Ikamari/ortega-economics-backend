@@ -1,11 +1,14 @@
 // Server
-const app = require("./app");
-const { configProps, getConfigProp } = require("./config");
+const fs  = require("fs");
+const { configProps, getConfigProp } = require("./app/config");
 // Database
 const mongoose = require("mongoose");
 
-const hostname = configProps[process.env.NODE_ENV].hostname;
-const port     = configProps[process.env.NODE_ENV].port;
+// Load all models
+require("./app/models");
+
+const hostname   = configProps[process.env.NODE_ENV].hostname;
+const port       = configProps[process.env.NODE_ENV].port;
 
 const onDBConnectionSuccess = () => {
     global.isReady = true;
@@ -17,7 +20,8 @@ const onDBConnectionError = (error) => {
     process.exit();
 };
 
-const server = app.listen(port, hostname, () => {
+const app = require("./app");
+app.listen(port, hostname, () => {
     global.isReady     = false;
     global.configProps = configProps;
     global.config      = getConfigProp;

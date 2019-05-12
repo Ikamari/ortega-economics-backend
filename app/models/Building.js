@@ -1,10 +1,9 @@
 // Database
 const { Schema, model } = require("mongoose");
+const Int32             = require("mongoose-int32");
 // Models
 const FractionModel = require("./Fraction");
 const ResourceModel = require("./Resource");
-// Schemas
-const ResourceSchema = require("../schemas/Resource");
 // Validators
 const { exists } = require("../validators/General");
 
@@ -15,12 +14,12 @@ const ResourceTurnoverSchema = new Schema({
         required: true
     },
     chance: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0
     },
     quantity: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0
     }
@@ -38,30 +37,30 @@ const BuildingSchema = new Schema({
         default: "Unnamed"
     },
     available_workplaces: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0
     },
     used_workplaces: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0
     },
     storage_size: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0,
         min: 0
     },
     used_storage: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0,
         min: 0
     },
     resources: {
         type: Map,
-        of: Number,
+        of: Int32,
         required: true,
         default: {},
         validate: exists(ResourceModel)
@@ -77,7 +76,7 @@ const BuildingSchema = new Schema({
         default: []
     },
     defense_level: {
-        type: Number,
+        type: Int32,
         required: true,
         default: 0
     }
