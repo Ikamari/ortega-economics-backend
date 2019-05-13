@@ -1,6 +1,6 @@
 // Database
 const { Schema, model } = require("mongoose");
-const Int32             = require("mongoose-int32");
+const Int32 = require("mongoose-int32");
 // Validators
 const { exists } = require("../validators/General");
 

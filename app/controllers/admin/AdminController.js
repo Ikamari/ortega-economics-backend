@@ -12,7 +12,7 @@ class AdminController extends Controller {
                 if (error) {
                     return response.status(500).send(`Can't get documents of ${Model.collection.collectionName} collection: ${error.message}`);
                 }
-                response.status(200).send(request.params.id ? documents[0] : documents);
+                response.status(200).send(documents);
             })
         });
 

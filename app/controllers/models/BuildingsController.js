@@ -6,6 +6,21 @@ const Controller = require("../Controller");
 class BuildingsController extends Controller {
 
     createRoutes(router) {
+        router.get("/", (request, response, next) => {
+            model("Building").find({}, (error, documents) => {
+                response.status(200).send(documents);
+            }).catch(error => next(error))
+        });
+
+        router.get("/:id", (request, response, next) => {
+            model("Building").findById(request.params.id, (error, document) => {
+                if (!document) {
+                    return response.status(500).send(`Can't find specified document`);
+                }
+                response.status(200).send(document);
+            }).catch(error => next(error))
+        });
+
         router.post("/:id/resources", (request, response, next) => {
             model("Building").findById(request.params.id).then((document) => {
                 if (!document) {

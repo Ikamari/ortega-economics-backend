@@ -1,6 +1,6 @@
 // Database
 const { Schema, model } = require("mongoose");
-const Int32             = require("mongoose-int32");
+const Int32 = require("mongoose-int32");
 // Models
 const FractionModel = require("./Fraction");
 const ResourceModel = require("./Resource");
@@ -82,7 +82,8 @@ const BuildingSchema = new Schema({
     }
 });
 
-BuildingSchema.methods.editResources = function (resources, strictCheck = true) {
+BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
+    // todo: merge repeating resources
     let newUsedStorage = 0;
 
     // Add or remove specified resources
@@ -121,10 +122,11 @@ BuildingSchema.methods.editResources = function (resources, strictCheck = true) 
     }
 
     this.used_storage = newUsedStorage;
+    // todo: log changes
     return this.save();
 };
 
-BuildingSchema.methods.editResource = function (resource, strictCheck = true) {
+BuildingSchema.methods.editResource = function(resource, strictCheck = true) {
     return this.editResources(resource, strictCheck)
 };
 

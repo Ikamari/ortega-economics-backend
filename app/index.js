@@ -25,6 +25,7 @@ app.use("/admin/traits",     AdminControllers.TraitController);
 // Models controllers
 app.use("/fractions", ModelControllers.FractionsController);
 app.use("/buildings", ModelControllers.BuildingsController);
+app.use("/resources", ModelControllers.ResourcesController);
 
 // Exception handle middleware
 app.use(function (error, request, response, next) {

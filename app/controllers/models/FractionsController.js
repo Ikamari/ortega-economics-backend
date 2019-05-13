@@ -6,6 +6,21 @@ const Controller = require("../Controller");
 class FractionsController extends Controller {
 
     createRoutes(router) {
+        router.get("/", (request, response, next) => {
+            model("Fraction").find({}, (error, documents) => {
+                response.status(200).send(documents);
+            }).catch(error => next(error))
+        });
+
+        router.get("/:id", (request, response, next) => {
+            model("Fraction").findById(request.params.id, (error, document) => {
+                if (!document) {
+                    return response.status(500).send(`Can't find specified document`);
+                }
+                response.status(200).send(document);
+            }).catch(error => next(error))
+        });
+
         // Get all fraction resources
         router.get("/:id/resources", (request, response, next) => {
             model("Fraction").findById(request.params.id).then(document => {
@@ -52,6 +67,22 @@ class FractionsController extends Controller {
                     response.status(200).send(buildings)
                 )).catch(error => next(error))
             }).catch(error => next(error));
+        });
+
+        router.post("/:id/resources", (request, response, next) => {
+            model("Fraction").findById(request.params.id).then((document) => {
+                if (!document) {
+                    return response.status(500).send(`Can't find specified document`);
+                }
+
+                document.editResources(
+                    request.body.resources,
+                    request.body.strictCheck
+                ).then(result => {
+                    response.status(200).send(result)
+                }).catch(error => next(error));
+
+            }).catch(error => next(error))
         });
     }
 
