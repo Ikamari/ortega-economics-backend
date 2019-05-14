@@ -160,6 +160,10 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
     })
 };
 
+FractionSchema.methods.editResource = async function(resource, strictCheck = true) {
+    this.editResources([resource], strictCheck);
+}
+
 // Get overall info about free/available storage space in buildings of fraction
 FractionSchema.virtual("storage").get(async function() {
     const buildings = await model("Building").find({ fraction_id: this._id });

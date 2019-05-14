@@ -14,14 +14,17 @@ const ResourceTurnoverSchema = new Schema({
         required: true
     },
     chance: {
-        type: Int32,
+        type: Number,
         required: true,
-        default: 0
+        default: 0,
+        max: 100,
+        min: 0
     },
-    quantity: {
+    amount: {
         type: Int32,
         required: true,
-        default: 0
+        default: 0,
+        min: 0
     }
 });
 
@@ -129,6 +132,42 @@ BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
 BuildingSchema.methods.editResource = function(resource, strictCheck = true) {
     return this.editResources(resource, strictCheck)
 };
+
+BuildingSchema.methods.addProduction = function (turnover, autoSave = true) {
+    this.produces.push({
+        resource_id: turnover._id,
+        amount:      turnover.amount,
+        chance:      turnover.chance
+    })
+    return autoSave ? this.save() : true;
+}
+
+BuildingSchema.methods.removeProduction = function (turnoverId, autoSave = true) {
+    const turnover = this.produces.id(turnoverId);
+    if (!turnover) {
+        throw Error("Can't find specified turnover")
+    }
+    turnover.remove();
+    return autoSave ? this.save() : true;
+}
+
+BuildingSchema.methods.addConsumption = function (turnover, autoSave = true) {
+    this.consumes.push({
+        resource_id: turnover._id,
+        amount:      turnover.amount,
+        chance:      turnover.chance
+    })
+    return autoSave ? this.save() : true;
+}
+
+BuildingSchema.methods.removeConsumption = function (turnoverId, autoSave = true) {
+    const turnover = this.produces.id(turnoverId);
+    if (!turnover) {
+        throw Error("Can't find specified turnover")
+    }
+    turnover.remove();
+    return autoSave ? this.save() : true;
+}
 
 const BuildingModel = model("Building", BuildingSchema);
 
