@@ -1,6 +1,9 @@
 // Database
 const { Schema, model } = require("mongoose");
 const Int32 = require("mongoose-int32");
+// Helpers
+const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
+const { sortByStoragePriority } = require("../helpers/BuildingsHelper");
 // Validators
 const { exists } = require("../validators/General");
 
@@ -68,9 +71,8 @@ FractionSchema.methods.hasResources = async function(resourcesToFind, throwExcep
 FractionSchema.methods.editResources = async function(resources, strictCheck = true) {
     // todo: Try to use transactions (replica sets are required)
     const storageInfo = await this.storage;
-    // todo: merge repeating resources
-    let resourcesToAdd = [...resources].sort((a, b) => (a.amount > b.amount) ? 1 : ((b.amount > a.amount) ? -1 : 0));
-    let neededStorageSize  = 0;
+    let resourcesToAdd = sortResources(mergeResources(resources));
+    let neededStorageSize = 0;
 
     // Count overall amount of resources
     resources.map((resource) => {
@@ -82,7 +84,7 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
         throw new Error(`Storage will be overflowed (new: ${neededStorageSize + storageInfo.used_storage} > max: ${storageInfo.storage_size})`);
     }
 
-    const buildings = await this.buildings;
+    const buildings = sortByStoragePriority(await this.buildings);
     resourcesToAdd.forEach((resource, key, resources) => {
         for (const building of buildings) {
             if (resources[key].amount === 0) {

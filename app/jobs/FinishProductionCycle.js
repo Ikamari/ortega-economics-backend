@@ -1,5 +1,7 @@
 // Database
 const { model } = require("mongoose");
+// Helpers
+const { sortByProductionPriority } = require("../helpers/BuildingsHelper");
 
 const handleBuilding = async (building, fraction = null, throwException = true) => {
     try {
@@ -68,7 +70,7 @@ const handleFraction = (fraction, throwException = true) => {
         fraction.buildings
             .then(buildings => {
                 let buildingsToProcess = buildings.length;
-                buildings.map(async (building) => await handleBuilding(building, fraction, throwException).then(() => {
+                sortByProductionPriority(buildings).map(async (building) => await handleBuilding(building, fraction, throwException).then(() => {
                     buildingsToProcess--;
                     if (buildingsToProcess === 0) resolve(true)
                 }).catch(error => reject(error)))

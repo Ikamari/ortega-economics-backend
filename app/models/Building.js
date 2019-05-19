@@ -1,6 +1,8 @@
 // Database
 const { Schema, model } = require("mongoose");
 const Int32 = require("mongoose-int32");
+// Helpers
+const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
 // Models
 const FractionModel = require("./Fraction");
 const ResourceModel = require("./Resource");
@@ -28,7 +30,6 @@ const ResourceTurnoverSchema = new Schema({
     }
 });
 
-// todo: add production and storage priority
 const BuildingSchema = new Schema({
     fraction_id: {
         validate: exists(FractionModel),
@@ -84,6 +85,16 @@ const BuildingSchema = new Schema({
         required: true,
         default: false
     },
+    production_priority: {
+        type: Int32,
+        required: true,
+        default: 0
+    },
+    storage_priority: {
+        type: Int32,
+        required: true,
+        default: 0
+    },
     defense_level: {
         type: Int32,
         required: true,
@@ -92,7 +103,7 @@ const BuildingSchema = new Schema({
 });
 
 BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
-    // todo: merge repeating resources
+    resources = sortResources(mergeResources(resources));
     let newUsedStorage = 0;
 
     // Add or remove specified resources
