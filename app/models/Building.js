@@ -17,7 +17,7 @@ const ResourceTurnoverSchema = new Schema({
         type: Number,
         required: true,
         default: 0,
-        max: 100,
+        max: 1,
         min: 0
     },
     amount: {
@@ -28,6 +28,7 @@ const ResourceTurnoverSchema = new Schema({
     }
 });
 
+// todo: add production and storage priority
 const BuildingSchema = new Schema({
     fraction_id: {
         validate: exists(FractionModel),
@@ -78,6 +79,11 @@ const BuildingSchema = new Schema({
         required: true,
         default: []
     },
+    is_active: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     defense_level: {
         type: Int32,
         required: true,
@@ -91,15 +97,26 @@ BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
 
     // Add or remove specified resources
     resources.map((resource) => {
+        // Skip iteration if storage is fully filled
+        if (resource.amount >= 0 && newUsedStorage >= this.storage_size) return;
+        const resourceId = resource._id.toString();
+
         let newAmount = 0;
-        if (this.resources.has(resource._id)) {
-            newAmount = this.resources.get(resource._id) + resource.amount;
-            this.resources.set(resource._id, newAmount)
+        if (this.resources.has(resourceId)) {
+            newAmount = this.resources.get(resourceId) + resource.amount;
+            this.resources.set(resourceId, newAmount)
         } else {
             newAmount = resource.amount;
-            this.resources.set(resource._id, newAmount)
+            this.resources.set(resourceId, newAmount)
         }
         newUsedStorage += newAmount;
+
+        // If storage got overflowed and strict check is disabled, subtract part of resources to fit storage size
+        if (newUsedStorage > this.storage_size && !strictCheck) {
+            const amountToSubtract = newUsedStorage - this.storage_size;
+            this.resources.set(resourceId, this.resources.get(resourceId) - amountToSubtract);
+            newUsedStorage -= amountToSubtract
+        }
     });
 
     // Storage mustn't be overflowed
@@ -145,7 +162,7 @@ BuildingSchema.methods.addProduction = function (turnover, autoSave = true) {
 BuildingSchema.methods.removeProduction = function (turnoverId, autoSave = true) {
     const turnover = this.produces.id(turnoverId);
     if (!turnover) {
-        throw Error("Can't find specified turnover")
+        throw new Error("Can't find specified turnover")
     }
     turnover.remove();
     return autoSave ? this.save() : true;
@@ -163,7 +180,7 @@ BuildingSchema.methods.addConsumption = function (turnover, autoSave = true) {
 BuildingSchema.methods.removeConsumption = function (turnoverId, autoSave = true) {
     const turnover = this.produces.id(turnoverId);
     if (!turnover) {
-        throw Error("Can't find specified turnover")
+        throw new Error("Can't find specified turnover")
     }
     turnover.remove();
     return autoSave ? this.save() : true;

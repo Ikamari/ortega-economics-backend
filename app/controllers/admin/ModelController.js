@@ -1,10 +1,9 @@
 // Server
-const express    = require("express");
-const bodyParser = require("body-parser");
+const express = require("express");
 // Controller foundation
 const Controller = require("../Controller");
 
-class AdminController extends Controller {
+class ModelController extends Controller {
 
     createRoutes(router, Model) {
         router.get("/", (request, response) => {
@@ -64,12 +63,10 @@ class AdminController extends Controller {
 
     getRouter(Model) {
         const router = express.Router();
-        router.use(bodyParser.urlencoded({extended: true}));
-        router.use(bodyParser.json());
         this.createRoutes(router, Model);
         return router;
     }
 
 }
 
-module.exports = AdminController;
+module.exports = ModelController;

@@ -8,14 +8,14 @@ module.exports.getConfigProp = (path, useEnvironment = true) => {
     let property    = global.configProps[useEnvironment ? process.env.NODE_ENV : pathParts[0]];
 
     if (!property) {
-        throw `Requested undefined config property "${path}"`
+        throw new Error(`Requested undefined config property "${path}"`)
     }
 
     for (let pathPartIndex = +!useEnvironment; pathPartIndex < pathParts.length; pathPartIndex++) {
         if (pathParts[pathPartIndex] in property) {
             property = property[pathParts[pathPartIndex]]
         } else {
-            throw `Requested undefined config property "${path}"`
+            throw new Error(`Requested undefined config property "${path}"`)
         }
     }
 

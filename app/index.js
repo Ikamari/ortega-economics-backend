@@ -6,21 +6,23 @@ const AdminControllers = require("./controllers/admin");
 const ModelControllers = require("./controllers/models");
 
 const app = express();
-
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
 
 // Admin controllers
-app.use("/admin/blueprints", AdminControllers.BlueprintController);
-app.use("/admin/buildings",  AdminControllers.BuildingController);
-app.use("/admin/facilities", AdminControllers.FacilityController);
-app.use("/admin/fractions",  AdminControllers.FractionController);
-app.use("/admin/perks",      AdminControllers.PerkController);
-app.use("/admin/players",    AdminControllers.PlayerController);
-app.use("/admin/resources",  AdminControllers.ResourceController);
-app.use("/admin/traits",     AdminControllers.TraitController);
+app.use("/admin/jobs", AdminControllers.JobsController)
+
+// Admin model controllers
+app.use("/admin/blueprints", AdminControllers.BlueprintModelController);
+app.use("/admin/buildings",  AdminControllers.BuildingModelController);
+app.use("/admin/facilities", AdminControllers.FacilityModelController);
+app.use("/admin/fractions",  AdminControllers.FractionModelController);
+app.use("/admin/perks",      AdminControllers.PerkModelController);
+app.use("/admin/players",    AdminControllers.PlayerModelController);
+app.use("/admin/resources",  AdminControllers.ResourceModelController);
+app.use("/admin/traits",     AdminControllers.TraitModelController);
 
 // Models controllers
 app.use("/fractions", ModelControllers.FractionsController);

@@ -50,23 +50,20 @@ const FractionSchema = new Schema({
     }
 });
 
-// Get resources from all fraction's buildings
-FractionSchema.virtual("resources").get(async function() {
-    const buildings = await model("Building").find({ fraction_id: this._id });
-
-    let resources = {};
-    buildings.map((building) => {
-        building.resources.forEach((value, key) => {
-            if (key in resources) {
-                resources[key] += value;
-            } else {
-                resources[key] = value;
+FractionSchema.methods.hasResources = async function(resourcesToFind, throwException = true) {
+    const fractionResources = await this.resources;
+    try {
+        resourcesToFind.map((resourceToFind) => {
+            if (Math.abs(resourceToFind.amount) > fractionResources[resourceToFind._id]) {
+                throw new Error("Fraction doesn't have enough of resources");
             }
         })
-    });
-
-    return resources;
-});
+    } catch (e) {
+        if (throwException) throw e;
+        return false
+    }
+    return true
+}
 
 FractionSchema.methods.editResources = async function(resources, strictCheck = true) {
     // todo: Try to use transactions (replica sets are required)
@@ -91,6 +88,7 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
             if (resources[key].amount === 0) {
                 break;
             }
+            const resourceId = resource._id.toString();
 
             // Add and subtract operations must be processed differently
             if (resource.amount >= 0) {
@@ -110,19 +108,19 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
                 }
 
                 building.used_storage += amountToAdd;
-                if (building.resources.has(resource._id)) {
-                    building.resources.set(resource._id, building.resources.get(resource._id) + amountToAdd);
+                if (building.resources.has(resourceId)) {
+                    building.resources.set(resourceId, building.resources.get(resourceId) + amountToAdd);
                 } else {
-                    building.resources.set(resource._id, amountToAdd);
+                    building.resources.set(resourceId, amountToAdd);
                 }
             } else {
                 // Check whether building has such resource
-                if (!building.resources.has(resource._id)) {
+                if (!building.resources.has(resourceId)) {
                     continue;
                 }
 
                 // Subtract possible amount of resource from storage and used storage size
-                const difference = building.resources.get(resource._id) + resource.amount;
+                const difference = building.resources.get(resourceId) + resource.amount;
 
                 let amountToRemove;
                 if (difference < 0) {
@@ -134,7 +132,7 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
                 }
 
                 building.used_storage -= amountToRemove;
-                building.resources.set(resource._id, building.resources.get(resource._id) - amountToRemove);
+                building.resources.set(resourceId, building.resources.get(resourceId) - amountToRemove);
             }
         }
     })
@@ -163,6 +161,24 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
 FractionSchema.methods.editResource = async function(resource, strictCheck = true) {
     this.editResources([resource], strictCheck);
 }
+
+// Get resources from all fraction's buildings
+FractionSchema.virtual("resources").get(async function() {
+    const buildings = await model("Building").find({ fraction_id: this._id });
+
+    let resources = {};
+    buildings.map((building) => {
+        building.resources.forEach((value, key) => {
+            if (key in resources) {
+                resources[key] += value;
+            } else {
+                resources[key] = value;
+            }
+        })
+    });
+
+    return resources;
+});
 
 // Get overall info about free/available storage space in buildings of fraction
 FractionSchema.virtual("storage").get(async function() {
