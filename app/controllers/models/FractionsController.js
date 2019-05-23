@@ -8,29 +8,29 @@ class FractionsController extends Controller {
     createRoutes(router) {
         router.get("/", (request, response, next) => {
             model("Fraction").find({})
-                .then((documents) => {
-                    response.status(200).send(documents);
+                .then((fractions) => {
+                    response.status(200).send(fractions);
                 }).catch(error => next(error))
         });
 
         router.get("/:id", (request, response, next) => {
             model("Fraction").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((fraction) => {
+                    if (!fraction) {
+                        return response.status(404).send(`Can't find specified fraction`);
                     }
-                    response.status(200).send(document);
+                    response.status(200).send(fraction);
                 }).catch(error => next(error))
         });
 
         // Get all fraction resources
         router.get("/:id/resources", (request, response, next) => {
             model("Fraction").findById(request.params.id)
-                .then(document => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((fraction) => {
+                    if (!fraction) {
+                        return response.status(404).send(`Can't find specified fraction`);
                     }
-                    document.resources.then((resources) => (
+                    fraction.resources.then((resources) => (
                         response.status(200).send(resources)
                     )).catch(error => next(error))
                 }).catch(error => next(error));
@@ -39,11 +39,11 @@ class FractionsController extends Controller {
         // Get all fraction members
         router.get("/:id/members", (request, response, next) => {
             model("Fraction").findById(request.params.id)
-                .then(document => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((fraction) => {
+                    if (!fraction) {
+                        return response.status(404).send(`Can't find specified fraction`);
                     }
-                    document.members.then((members) => (
+                    fraction.members.then((members) => (
                         response.status(200).send(members)
                     )).catch(error => next(error))
                 }).catch(error => next(error));
@@ -52,11 +52,11 @@ class FractionsController extends Controller {
         // Get all fraction buildings
         router.get("/:id/buildings", (request, response, next) => {
             model("Fraction").findById(request.params.id)
-                .then(document => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((fraction) => {
+                    if (!fraction) {
+                        return response.status(404).send(`Can't find specified fraction`);
                     }
-                    document.buildings.then((buildings) => (
+                    fraction.buildings.then((buildings) => (
                         response.status(200).send(buildings)
                     )).catch(error => next(error))
                 }).catch(error => next(error));
@@ -65,11 +65,11 @@ class FractionsController extends Controller {
         // Get overall info about free/available storage space in buildings of fraction
         router.get("/:id/storage", (request, response, next) => {
             model("Fraction").findById(request.params.id)
-                .then(document => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((fraction) => {
+                    if (!fraction) {
+                        return response.status(404).send(`Can't find specified fraction`);
                     }
-                    document.storage.then((buildings) => (
+                    fraction.storage.then((buildings) => (
                         response.status(200).send(buildings)
                     )).catch(error => next(error))
                 }).catch(error => next(error));
@@ -77,12 +77,12 @@ class FractionsController extends Controller {
 
         router.post("/:id/resources", (request, response, next) => {
             model("Fraction").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((fraction) => {
+                    if (!fraction) {
+                        return response.status(404).send(`Can't find specified fraction`);
                     }
 
-                    document.editResources(
+                    fraction.editResources(
                         request.body.resources,
                         request.body.strictCheck
                     ).then(result => {

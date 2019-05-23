@@ -8,49 +8,49 @@ class BuildingsController extends Controller {
     createRoutes(router) {
         router.get("/", (request, response, next) => {
             model("Building").find({})
-                .then((documents) => {
-                    response.status(200).send(documents);
+                .then((buildings) => {
+                    response.status(200).send(buildings);
                 }).catch(error => next(error))
         });
 
         router.get("/:id", (request, response, next) => {
             model("Building").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
-                    response.status(200).send(document);
+                    response.status(200).send(building);
                 }).catch(error => next(error))
         });
 
         router.get("/:id/activate", (request, response, next) => {
             model("Building").findByIdAndUpdate(request.params.id, { is_active: true })
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
-                    response.status(200).send(document);
+                    response.status(200).send(building);
                 }).catch(error => next(error))
         });
 
         router.get("/:id/deactivate", (request, response, next) => {
             model("Building").findByIdAndUpdate(request.params.id, { is_active: false })
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
-                    response.status(200).send(document);
+                    response.status(200).send(building);
                 }).catch(error => next(error))
         });
 
         router.post("/:id/resources", (request, response, next) => {
             model("Building").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
 
-                    document.editResources(
+                    building.editResources(
                         request.body.resources,
                         request.body.strictCheck
                     ).then(result => {
@@ -62,12 +62,12 @@ class BuildingsController extends Controller {
 
         router.post("/:id/production", (request, response, next) => {
             model("Building").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
 
-                    document.addProduction(
+                    building.addProduction(
                         request.body
                     ).then(result => {
                         response.status(200).send(result)
@@ -78,12 +78,12 @@ class BuildingsController extends Controller {
 
         router.post("/:id/consumption", (request, response, next) => {
             model("Building").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
 
-                    document.addConsumption(
+                    building.addConsumption(
                         request.body
                     ).then(result => {
                         response.status(200).send(result)
@@ -94,12 +94,12 @@ class BuildingsController extends Controller {
 
         router.delete("/:id/production/:turnoverId", (request, response, next) => {
             model("Building").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
 
-                    document.removeProduction(
+                    building.removeProduction(
                         request.params.turnoverId
                     ).then(result => {
                         response.status(200).send(result)
@@ -110,12 +110,12 @@ class BuildingsController extends Controller {
 
         router.delete("/:id/consumption/:turnoverId", (request, response, next) => {
             model("Building").findById(request.params.id)
-                .then((document) => {
-                    if (!document) {
-                        return response.status(500).send(`Can't find specified document`);
+                .then((building) => {
+                    if (!building) {
+                        return response.status(404).send(`Can't find specified building`);
                     }
 
-                    document.removeConsumption(
+                    building.removeConsumption(
                         request.params.turnoverId
                     ).then(result => {
                         response.status(200).send(result)

@@ -6,6 +6,7 @@ const ModelController = require("./ModelController");
 const JobsController =require("./JobsController");
 
 module.exports.BlueprintModelController = (new ModelController).getRouter(model("Blueprint"));
+module.exports.BlueprintModelController = (new ModelController).getRouter(model("Recipe"));
 module.exports.BuildingModelController  = (new ModelController).getRouter(model("Building"));
 module.exports.FacilityModelController  = (new ModelController).getRouter(model("Facility"));
 module.exports.FractionModelController  = (new ModelController).getRouter(model("Fraction"));

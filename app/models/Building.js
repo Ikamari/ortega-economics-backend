@@ -3,9 +3,6 @@ const { Schema, model } = require("mongoose");
 const Int32 = require("mongoose-int32");
 // Helpers
 const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
-// Models
-const FractionModel = require("./Fraction");
-const ResourceModel = require("./Resource");
 // Validators
 const { exists } = require("../validators/General");
 
@@ -32,7 +29,7 @@ const ResourceTurnoverSchema = new Schema({
 
 const BuildingSchema = new Schema({
     fraction_id: {
-        validate: exists(FractionModel),
+        validate: exists(model("Fraction")),
         type: Schema.Types.ObjectId,
         default: null
     },
@@ -68,7 +65,7 @@ const BuildingSchema = new Schema({
         of: Int32,
         required: true,
         default: {},
-        validate: exists(ResourceModel)
+        validate: exists(model("Resource"))
     },
     produces: {
         type: [ResourceTurnoverSchema],

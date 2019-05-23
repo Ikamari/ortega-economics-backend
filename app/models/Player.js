@@ -3,6 +3,7 @@ const { Schema, model } = require("mongoose");
 // Validators
 const { exists } = require("../validators/General");
 
+// todo: rename to "Character"
 const PlayerModel = model("Player", new Schema({
     name: {
         type: String,

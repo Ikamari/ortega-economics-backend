@@ -6,9 +6,9 @@ const Controller = require("../Controller");
 class ResourcesController extends Controller {
     createRoutes(router) {
         router.get("/", (request, response, next) => {
-            model("Resource").find({}, (error, documents) => {
-                response.status(200).send(documents);
-            }).catch(error => next(error))
+            model("Resource").find({})
+                .then((resources) => response.status(200).send(resources))
+                .catch(error => next(error))
         });
     }
 }

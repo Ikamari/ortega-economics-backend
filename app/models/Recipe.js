@@ -1,46 +1,30 @@
 // Database
 const { Schema, model } = require("mongoose");
-const Int32 = require("mongoose-int32");
 // Schemas
 const ResourceSchema = require("./schemas/Resource");
 // Validators
 const { exists } = require("../validators/General");
 
-const BlueprintModel = model("Blueprint", new Schema({
+const RecipeModel = model("Recipe", new Schema({
     name: {
         type: String,
         required: true,
         default: "Unnamed"
     },
-    item_id: {
+    resource_id: {
+        validate: exists(model("Resource")),
         type: String,
         required: true,
         default: "1"
-    },
-    quality: {
-        type: Int32,
-        required: true,
-        default: 0
-    },
-    craft_time: {
-        type: Number,
-        required: true,
-        default: 0
     },
     required_resources: {
         type: [ResourceSchema],
         required: true,
         default: []
     },
-    required_facilities: {
+    required_facility: {
         validate: exists(model("Facility")),
-        type: [Schema.Types.ObjectId],
-        required: true,
-        default: []
-    },
-    required_perks: {
-        validate: exists(model("Perk")),
-        type: [Schema.Types.ObjectId],
+        type: Schema.Types.ObjectId,
         required: true,
         default: []
     },
@@ -51,4 +35,4 @@ const BlueprintModel = model("Blueprint", new Schema({
     }
 }));
 
-module.exports = BlueprintModel;
+module.exports = RecipeModel;
