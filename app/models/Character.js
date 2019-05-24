@@ -3,8 +3,7 @@ const { Schema, model } = require("mongoose");
 // Validators
 const { exists } = require("../validators/General");
 
-// todo: rename to "Character"
-const PlayerModel = model("Player", new Schema({
+const CharacterModel = model("Character", new Schema({
     name: {
         type: String,
         required: true,
@@ -24,4 +23,4 @@ const PlayerModel = model("Player", new Schema({
     // todo: add recipes
 }));
 
-module.exports = PlayerModel;
+module.exports = CharacterModel;

@@ -200,7 +200,7 @@ FractionSchema.virtual("storage").get(async function() {
 
 // Get all fraction members
 FractionSchema.virtual("members").get(async function() {
-    return await model("Player").find({ fraction_id: this._id });
+    return await model("Character").find({ fraction_id: this._id });
 });
 
 // Get all fraction buildings

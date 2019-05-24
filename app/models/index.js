@@ -8,5 +8,5 @@ module.exports.Blueprint    = require("./Blueprint");
 module.exports.Recipe       = require("./Recipe");
 module.exports.Building     = require("./Building");
 module.exports.Fraction     = require("./Fraction");
-module.exports.Player       = require("./Player");
+module.exports.Character    = require("./Character");
 module.exports.CraftProcess = require("./CraftProcess")

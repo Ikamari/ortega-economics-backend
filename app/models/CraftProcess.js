@@ -17,8 +17,8 @@ const CraftProcessModel = model("CraftProcess", new Schema({
         type: String,
         required: true
     },
-    crafting_player_id: {
-        validate: exists(model("Player")),
+    crafting_character_id: {
+        validate: exists(model("Character")),
         type: Schema.Types.ObjectId,
         default: null
     },

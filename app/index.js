@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 // Admin controllers
-app.use("/admin/jobs", AdminControllers.JobsController)
+app.use("/admin/jobs", AdminControllers.ProductionController)
 
 // Admin model controllers
 app.use("/admin/blueprints", AdminControllers.BlueprintModelController);
@@ -20,7 +20,7 @@ app.use("/admin/buildings",  AdminControllers.BuildingModelController);
 app.use("/admin/facilities", AdminControllers.FacilityModelController);
 app.use("/admin/fractions",  AdminControllers.FractionModelController);
 app.use("/admin/perks",      AdminControllers.PerkModelController);
-app.use("/admin/players",    AdminControllers.PlayerModelController);
+app.use("/admin/characters", AdminControllers.CharacterModelController);
 app.use("/admin/resources",  AdminControllers.ResourceModelController);
 app.use("/admin/traits",     AdminControllers.TraitModelController);
 
