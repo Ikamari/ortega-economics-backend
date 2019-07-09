@@ -20,5 +20,12 @@ const sortResources = (resources, direction = "asc") => {
     );
 }
 
-module.exports.sortResources  = sortResources;
-module.exports.mergeResources = mergeResources;
+const invertResources = (resources) => {
+    return resources.map(function (resource, key) {
+        this[key].amount *= -1
+    }, resources);
+}
+
+module.exports.sortResources   = sortResources;
+module.exports.mergeResources  = mergeResources;
+module.exports.invertResources = invertResources;

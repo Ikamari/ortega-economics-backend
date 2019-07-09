@@ -1,7 +1,10 @@
 // Database
 const { model }  = require("mongoose");
+// Jobs
+const Craft    = require("../../jobs/Craft")
 // Controller foundation
 const Controller = require("../Controller");
+const { body }   = require('express-validator');
 
 class BuildingsController extends Controller {
 
@@ -17,7 +20,7 @@ class BuildingsController extends Controller {
             model("Building").findById(request.params.id)
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
                     response.status(200).send(building);
                 }).catch(error => next(error))
@@ -27,7 +30,7 @@ class BuildingsController extends Controller {
             model("Building").findByIdAndUpdate(request.params.id, { is_active: true })
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
                     response.status(200).send(building);
                 }).catch(error => next(error))
@@ -37,7 +40,7 @@ class BuildingsController extends Controller {
             model("Building").findByIdAndUpdate(request.params.id, { is_active: false })
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
                     response.status(200).send(building);
                 }).catch(error => next(error))
@@ -47,7 +50,7 @@ class BuildingsController extends Controller {
             model("Building").findById(request.params.id)
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
 
                     building.editResources(
@@ -64,7 +67,7 @@ class BuildingsController extends Controller {
             model("Building").findById(request.params.id)
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
 
                     building.addProduction(
@@ -80,7 +83,7 @@ class BuildingsController extends Controller {
             model("Building").findById(request.params.id)
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
 
                     building.addConsumption(
@@ -92,18 +95,41 @@ class BuildingsController extends Controller {
                 }).catch(error => next(error))
         });
 
+        router.post("/:id/craft-by-blueprint", [
+            body("character_id").exists(),
+            body("blueprint_entity_id").exists(),
+            body("participants").exists().isArray(),
+            body("resources_multiplier").exists()
+        ], (request, response, next) => {
+            if (!this.checkValidation(request, next)) return;
+            model("Building").findById(request.params.id)
+                .then(async (building) => {
+                    if (!building) return response.status(404).send("Can't find specified building");
+
+                    const character = await model("Character").findById(request.body.character_id)
+                    if (!character) return response.status(400).send("Can't find specified character");
+
+                    const blueprintEntity = await model("BlueprintEntity").findById(request.body.blueprint_entity_id)
+                    if (!blueprintEntity) return response.status(400).send("Can't find specified blueprint entity");
+
+                    Craft.startByBlueprint(
+                        character,
+                        building,
+                        blueprintEntity,
+                        request.body.participants,
+                        request.body.resources_multiplier
+                    ).then(result => {
+                        response.status(200).send(result)
+                    }).catch(error => next(error));
+                }).catch(error => next(error))
+        })
+
         router.delete("/:id/production/:turnoverId", (request, response, next) => {
             model("Building").findById(request.params.id)
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
-
-                    building.removeProduction(
-                        request.params.turnoverId
-                    ).then(result => {
-                        response.status(200).send(result)
-                    }).catch(error => next(error));
 
                 }).catch(error => next(error))
         });
@@ -112,7 +138,7 @@ class BuildingsController extends Controller {
             model("Building").findById(request.params.id)
                 .then((building) => {
                     if (!building) {
-                        return response.status(404).send(`Can't find specified building`);
+                        return response.status(404).send("Can't find specified building");
                     }
 
                     building.removeConsumption(

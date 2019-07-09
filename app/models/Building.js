@@ -5,10 +5,13 @@ const Int32 = require("mongoose-int32");
 const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
 // Validators
 const { exists } = require("../validators/General");
+// Schemas
+const FacilitySchema = require("./schemas/Facility")
+const CraftProcessSchema = require("./schemas/CraftProcess")
 
 const ResourceTurnoverSchema = new Schema({
     resource_id: {
-        validate: exists(ResourceModel),
+        validate: exists("Resource"),
         type: Schema.Types.ObjectId,
         required: true
     },
@@ -29,7 +32,12 @@ const ResourceTurnoverSchema = new Schema({
 
 const BuildingSchema = new Schema({
     fraction_id: {
-        validate: exists(model("Fraction")),
+        validate: exists("Fraction"),
+        type: Schema.Types.ObjectId,
+        default: null
+    },
+    character_id: {
+        validate: exists("Character"),
         type: Schema.Types.ObjectId,
         default: null
     },
@@ -65,7 +73,12 @@ const BuildingSchema = new Schema({
         of: Int32,
         required: true,
         default: {},
-        validate: exists(model("Resource"))
+        validate: exists("Resource")
+    },
+    facilities: {
+        type: [FacilitySchema],
+        required: true,
+        default: []
     },
     produces: {
         type: [ResourceTurnoverSchema],
@@ -74,6 +87,11 @@ const BuildingSchema = new Schema({
     },
     consumes: {
         type: [ResourceTurnoverSchema],
+        required: true,
+        default: []
+    },
+    craft_processes: {
+        type: [CraftProcessSchema],
         required: true,
         default: []
     },
@@ -98,6 +116,43 @@ const BuildingSchema = new Schema({
         default: 0
     }
 });
+
+BuildingSchema.virtual("fraction").get(async function () {
+    return await model("Fraction").findById({ _id: this.fraction_id });
+})
+
+BuildingSchema.virtual("free_facilities").get(function() {
+    let freeFacilities = [];
+
+    this.facilities.map((facility) => {
+        let isFree = true;
+        this.craft_processes.some((craftProcess) => {
+            if (craftProcess.crafting_facilities.includes(facility._id)) {
+                isFree = false;
+                return;
+            }
+        })
+        if (isFree) {
+            freeFacilities.push(facility)
+        }
+    })
+
+    return freeFacilities
+})
+
+BuildingSchema.methods.hasResources = function(resourcesToFind, throwException = true) {
+    try {
+        resourcesToFind.map((resourceToFind) => {
+            if (Math.abs(resourceToFind.amount) > this.resources[resourceToFind._id]) {
+                throw new Error("Building doesn't have enough of resources");
+            }
+        })
+    } catch (e) {
+        if (throwException) throw e;
+        return false
+    }
+    return true
+}
 
 BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
     resources = sortResources(mergeResources(resources));

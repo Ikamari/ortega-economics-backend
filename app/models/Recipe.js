@@ -11,27 +11,25 @@ const RecipeModel = model("Recipe", new Schema({
         required: true,
         default: "Unnamed"
     },
-    resource_id: {
-        validate: exists(model("Resource")),
+    item_id: {
         type: String,
-        required: true,
-        default: "1"
+        default: null
+    },
+    resource_id: {
+        validate: exists("Resource"),
+        type: String,
+        default: null
     },
     required_resources: {
         type: [ResourceSchema],
         required: true,
         default: []
     },
-    required_facility: {
-        validate: exists(model("Facility")),
+    required_facilities: {
+        validate: exists("FacilityType"),
         type: Schema.Types.ObjectId,
         required: true,
         default: []
-    },
-    is_public: {
-        type: Boolean,
-        required: true,
-        default: false
     }
 }));
 

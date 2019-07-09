@@ -10,17 +10,16 @@ const CharacterModel = model("Character", new Schema({
         unique: true
     },
     fraction_id: {
-        validate: exists(model("Fraction")),
+        validate: exists("Fraction"),
         type: Schema.Types.ObjectId,
         default: null
     },
     perks: {
-        validate: exists(model("Perk")),
+        validate: exists("Perk"),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
     }
-    // todo: add recipes
 }));
 
 module.exports = CharacterModel;

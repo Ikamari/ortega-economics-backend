@@ -1,4 +1,7 @@
-const exists = (Model) => ({
+// Database
+const { model } = require("mongoose");
+
+const exists = (ModelName) => ({
     validator: (objectId) => {
         if (objectId === null) {
             return true;
@@ -20,18 +23,18 @@ const exists = (Model) => ({
             condition = 1;
         }
 
-        return Model.countDocuments({
+        return model(ModelName).countDocuments({
             _id: query
         }).exec().then((amount) => {
             return amount >= condition;
         });
     },
-    message: props => `${props.path} must point to existing ${Model.modelName}`
+    message: props => `${props.path} must point to existing ${ModelName}`
 });
 
-const existsIn = (Models) => {
-    if (!(Array.isArray(Models)) || Models.length <= 1) {
-        throw new Error("existsIn validator must receive array of at least two models")
+const existsIn = (ModelNames) => {
+    if (!(Array.isArray(ModelNames)) || ModelNames.length <= 1) {
+        throw new Error("existsIn validator must receive an array (haystack) with at least two model names")
     }
 
     return {
@@ -41,16 +44,28 @@ const existsIn = (Models) => {
             }
 
             let isValid = false;
-            Models.map((Model) => {
-                if (exists(Model).validator(objectId)) {
+            ModelNames.map((ModelName) => {
+                if (exists(ModelName).validator(objectId)) {
                     isValid = true;
                 }
             })
             return isValid;
         },
-        message: props => `${props.path} must point to existing:${Models.map((Model) => (" " + Model.modelName))}`
+        message: props => `${props.path} must point to existing:${ModelNames.map((ModelName) => (" " + ModelName))}`
+    }
+}
+
+const includes = (array) => {
+    if (!(Array.isArray(array)) || array.length <= 1) {
+        throw new Error("includes validator must receive an array (haystack) with at least two values")
+    }
+
+    return {
+        validator: (value) => (array.includes(value)),
+        message: props => `${props.path} must be equal to:${array.map((value) => (" " + value))}`
     }
 }
 
 module.exports.existsIn = existsIn
 module.exports.exists   = exists
+module.exports.includes = includes

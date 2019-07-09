@@ -46,7 +46,7 @@ const FractionSchema = new Schema({
         default: []
     },
     traits: {
-        validate: exists(model("Trait")),
+        validate: exists("Trait"),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
@@ -163,6 +163,30 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
 FractionSchema.methods.editResource = async function(resource, strictCheck = true) {
     this.editResources([resource], strictCheck);
 }
+
+FractionSchema.virtual("free_members").get(async function() {
+    const
+        freeMembers = [],
+        busyMembers = [],
+        buildings   = await this.buildings,
+        members     = await this.members;
+
+    // Get ObjectID of all busy members (that currently participate in craft)
+    buildings.map((building) => {
+        building.craft_processes.map((craftProcess) => {
+            craftProcess.crafting_characters.map((craftingCharacter) => {
+                busyMembers.push(craftingCharacter._id)
+            })
+        })
+    })
+
+    // Get free members
+    members.map((member) => {
+        if (!busyMembers.includes(member._id)) freeMembers.push(member)
+    })
+
+    return freeMembers
+})
 
 // Get resources from all fraction's buildings
 FractionSchema.virtual("resources").get(async function() {

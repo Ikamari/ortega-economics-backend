@@ -1,7 +1,7 @@
 // Database
 const { Schema, model } = require("mongoose");
 
-const FacilityModel = model("Facility", new Schema({
+const FacilityTypeModel = model("FacilityType", new Schema({
     name: {
         type: String,
         required: true,
@@ -9,4 +9,4 @@ const FacilityModel = model("Facility", new Schema({
     }
 }));
 
-module.exports = FacilityModel;
+module.exports = FacilityTypeModel;

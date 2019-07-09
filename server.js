@@ -1,5 +1,4 @@
 // Server
-const fs  = require("fs");
 const { configProps, getConfigProp } = require("./app/config");
 // Database
 const mongoose = require("mongoose");

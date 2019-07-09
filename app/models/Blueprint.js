@@ -1,10 +1,23 @@
 // Database
 const { Schema, model } = require("mongoose");
-const Int32 = require("mongoose-int32");
 // Schemas
 const ResourceSchema = require("./schemas/Resource");
 // Validators
-const { exists } = require("../validators/General");
+const { exists, includes } = require("../validators/General");
+
+const RequiredFacilitiesSchema = new Schema({
+    quality_level: {
+        type: String,
+        validate: includes(["poor", "basic", "solid", "complex"]),
+        required: true
+    },
+    facilities: {
+        validate: exists("FacilityType"),
+        type: [Schema.Types.ObjectId],
+        required: true,
+        default: []
+    }
+})
 
 const BlueprintModel = model("Blueprint", new Schema({
     name: {
@@ -17,15 +30,10 @@ const BlueprintModel = model("Blueprint", new Schema({
         required: true,
         default: "1"
     },
-    quality: {
-        type: Int32,
-        required: true,
-        default: 0
-    },
-    craft_time: {
+    time_multiplier: {
         type: Number,
         required: true,
-        default: 0
+        default: 1
     },
     required_resources: {
         type: [ResourceSchema],
@@ -33,21 +41,15 @@ const BlueprintModel = model("Blueprint", new Schema({
         default: []
     },
     required_facilities: {
-        validate: exists(model("Facility")),
-        type: [Schema.Types.ObjectId],
+        type: [RequiredFacilitiesSchema],
         required: true,
         default: []
     },
     required_perks: {
-        validate: exists(model("Perk")),
+        validate: exists("Perk"),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
-    },
-    is_public: {
-        type: Boolean,
-        required: true,
-        default: false
     }
 }));
 
