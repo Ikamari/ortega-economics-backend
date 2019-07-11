@@ -1,5 +1,6 @@
 // Database
 const { Schema } = require("mongoose");
+const Int32      = require("mongoose-int32");
 // Schemas
 const ResourceSchema = require("../schemas/Resource");
 // Validators
@@ -18,6 +19,11 @@ const CraftProcessSchema = new Schema({
         },
         type: String,
         required: true
+    },
+    quantity: {
+        type: Int32,
+        required: true,
+        default: 1
     },
     used_resources: {
         type: [ResourceSchema],

@@ -30,6 +30,11 @@ const RecipeModel = model("Recipe", new Schema({
         type: Schema.Types.ObjectId,
         required: true,
         default: []
+    },
+    craft_time: {
+        type: Number,
+        required: true,
+        default: 0
     }
 }));
 
