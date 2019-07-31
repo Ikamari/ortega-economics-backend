@@ -3,6 +3,7 @@ const { Schema, model } = require("mongoose");
 const Int32 = require("mongoose-int32");
 // Helpers
 const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
+const { hasObjectId } = require("../helpers/ObjectIdHelper");
 // Validators
 const { exists } = require("../validators/General");
 // Schemas
@@ -125,12 +126,8 @@ BuildingSchema.virtual("free_facilities").get(function() {
     let freeFacilities = [];
 
     this.facilities.map((facility) => {
-        let isFree = true;
-        this.craft_processes.some((craftProcess) => {
-            if (craftProcess.crafting_facilities.includes(facility._id)) {
-                isFree = false;
-                return;
-            }
+        const isFree = this.craft_processes.some((craftProcess) => {
+            return !craftProcess.is_finished && hasObjectId(craftProcess.crafting_facilities, facility._id);
         })
         if (isFree) {
             freeFacilities.push(facility)
@@ -156,7 +153,7 @@ BuildingSchema.methods.hasResources = function(resourcesToFind, throwException =
 
 BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
     resources = sortResources(mergeResources(resources));
-    let newUsedStorage = 0;
+    let newUsedStorage = this.used_storage;
 
     // Add or remove specified resources
     resources.map((resource) => {
@@ -172,7 +169,7 @@ BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
             newAmount = resource.amount;
             this.resources.set(resourceId, newAmount)
         }
-        newUsedStorage += newAmount;
+        newUsedStorage += resource.amount;
 
         // If storage got overflowed and strict check is disabled, subtract part of resources to fit storage size
         if (newUsedStorage > this.storage_size && !strictCheck) {
@@ -191,7 +188,7 @@ BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
     this.resources.forEach((amount, resourceId) => {
         if (amount < 0) {
             if (strictCheck) {
-                throw new Error("Amount of specific resource cannot be negative");
+                throw new Error("Storage doesn't have enough of specific resource");
             } else {
                 newUsedStorage += Math.abs(this.resources.get(resourceId));
                 this.resources.set(resourceId, 0)

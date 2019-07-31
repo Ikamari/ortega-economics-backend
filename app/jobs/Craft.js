@@ -1,7 +1,12 @@
+// Database
+const { model } = require("mongoose");
 // Helpers
 const { invertResources } = require("../helpers/ResourcesHelper");
+const { hasObjectId } = require("../helpers/ObjectIdHelper");
 // Moment
-const moment = require("moment")
+const moment = require("moment");
+// Models
+const { statusIds: craftProcessStatusIds } = require("../models/schemas/CraftProcess");
 
 // "Quality" levels
 const
@@ -36,15 +41,8 @@ class CraftProcessCreator {
         this.blueprintLevel  = null;
     }
 
-    // Check whether character has permission to start the craft process in specific building
     checkAccessToBuilding() {
-        if (
-            this.character.fraction_id.equals(this.building.fraction_id) ||
-            this.character._id.equals(this.building.character_id)
-        ) {
-            return true;
-        }
-        throw new Error("Character doesn't have access to building")
+        return checkAccessToBuilding(this.character, this.building);
     }
 
     checkResourcesMultiplier() {
@@ -60,7 +58,7 @@ class CraftProcessCreator {
     // Check whether building has all required facilities (at least for poor quality level) in it
     checkRequiredFacilities() {
         const freeFacilities     = this.building.free_facilities;
-        const requiredFacilities = this.craftingBy === "Blueprint" ? this.blueprint.required_facilities : this.recipe.required_facilities;
+        const requiredFacilities = this.craftingBy === "Blueprint" ? this.blueprint.required_facilities : this.recipe.required_facility;
 
         if (requiredFacilities.length === 0) {
             this.facilitiesLevel = BASIC_LEVEL;
@@ -69,8 +67,9 @@ class CraftProcessCreator {
 
         if (this.craftingBy === "Recipe") {
             freeFacilities.some((facility) => {
-                if (requiredFacilities.includes(facility.facility_type_id)) {
+                if (requiredFacilities.equals(facility.facility_type_id)) {
                     this.facilitiesToUse.push(facility._id)
+                    return true;
                 }
             })
             if (this.facilitiesToUse.length > 0) return;
@@ -111,7 +110,7 @@ class CraftProcessCreator {
                     case "complex": {
                         this.facilitiesLevel = COMPLEX_LEVEL;
                         this.facilitiesToUse = availableFacilities.values()
-                        return
+                        return true;
                     }
                 }
             }
@@ -130,7 +129,10 @@ class CraftProcessCreator {
             const fraction    = await this.building.fraction;
             const freeMembers = await fraction.free_members;
             this.participants.map((participantId) => {
-                if (!freeMembers.includes(participantId)) {
+                const isFree = freeMembers.filter(freeMember => {
+                    return freeMember._id.toString() === participantId
+                }).length !== 0
+                if (!isFree) {
                     throw new Error("One of defined participants is busy")
                 }
             })
@@ -145,13 +147,13 @@ class CraftProcessCreator {
 
         // Check whether defined participants have required perks
         let availablePerks = [];
-        this.participants.some(async (participantId) => {
-            if (availablePerks.length === this.blueprint.required_perks.length) return;
-
-            (await model("Character").findById(participantId)).perks.some((perk) => {
-                if (!availablePerks.includes(perk) && this.blueprint.required_perks.includes(perk)) {
+        const characters = await model("Character").find({"_id": { $in: this.participants }});
+        characters.some((character) => {
+            if (availablePerks.length === this.blueprint.required_perks.length) return true;
+            character.perks.some((perk) => {
+                if (!hasObjectId(availablePerks, perk) && hasObjectId(this.blueprint.required_perks, perk)) {
                     availablePerks.push(perk);
-                    if (availablePerks.length === this.blueprint.required_perks.length) return;
+                    if (availablePerks.length === this.blueprint.required_perks.length) return true;
                 }
             })
         })
@@ -174,7 +176,7 @@ class CraftProcessCreator {
     // Define how long specific item will be crafting by checked characteristics (blueprint quality, perks traits, ...)
     defineCraftingTime() {
         this.craftingTime = this.craftingBy === "Blueprint" ?
-            this.blueprint.time_multiplier * (this.resourcesLevel + this.facilityLevel + this.perksLevel + this.blueprintLevel) :
+            60 * (this.blueprint.time_multiplier * (this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel)) :
             this.recipe.craft_time * this.quantity
     }
 
@@ -194,15 +196,19 @@ class CraftProcessCreator {
 
     createCraftProcess() {
         this.building.craft_processes.push({
-            crafting_id:          this.blueprint._id,
+            crafting_id:          this.craftingBy === "Blueprint" ? this.blueprint._id : this.recipe._id,
+            blueprint_entity_id:  this.craftingBy === "Blueprint" ? this.blueprintEntity._id : null,
             crafting_by:          this.craftingBy,
             quantity:             this.quantity,
-            used_resources:       this.requiredResources,
+            quality:              this.craftingBy === "Blueprint" ? (this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel) : null,
+            // Clone current state of required resources to prevent saving unexpected changes
+            used_resources:       JSON.parse(JSON.stringify(this.requiredResources)),
             resources_multiplier: this.resourcesMultiplier,
             creator_character_id: this.character._id,
+            crafting_fraction_id: this.building.fraction_id,
             crafting_characters:  this.participants,
             crafting_facilities:  this.facilitiesToUse,
-            finish_at: moment().add(this.craftingTime * 60, "minutes").toDate(),
+            finish_at: moment().add(this.craftingTime, "minutes").toDate()
         });
     }
 
@@ -211,7 +217,7 @@ class CraftProcessCreator {
             this.checkAccessToBuilding();
 
             this.craftingBy          = "Blueprint";
-            this.participants        = participants;
+            this.participants        = [...new Set(participants)]; // Get rid of duplicates
             this.resourcesMultiplier = resourcesMultiplier;
             this.checkResourcesMultiplier();
 
@@ -266,6 +272,22 @@ class CraftProcessCreator {
 
 }
 
+// Check whether character has permission to start the craft process in specific building
+const checkAccessToBuilding = (character, building) => {
+    if (character.fraction_id.equals(building.fraction_id) || character._id.equals(building.character_id)) {
+        return true;
+    }
+    throw new Error("Character doesn't have access to building")
+}
+
+// Check whether character has permission to the craft process
+const checkAccessToCraftProcess = (character, craftProcess) => {
+    if (character.fraction_id.equals(craftProcess.crafting_fraction_id) || character._id.equals(craftProcess.creator_character_id)) {
+        return true;
+    }
+    throw new Error("Character doesn't have access to the craft process")
+}
+
 const startCraftByBlueprint = (character, building, blueprintEntity, participants = [], resourcesMultiplier = 1, throwException = true) => {
     return (new CraftProcessCreator(character, building)).craftByBlueprint(blueprintEntity, participants, resourcesMultiplier, throwException)
 }
@@ -274,12 +296,86 @@ const startCraftByRecipe = (character, building, recipe, quantity = 1, throwExce
     return (new CraftProcessCreator(character, building)).craftByRecipe(recipe, quantity, throwException)
 }
 
-const cancelCraft = (character, building, craftProcess, force = false) => {
+const cancelCraft = async (character, building, craftProcess, force = false, throwException = true) => {
+    try {
+        if (!force) {
+            // Character must have access to the building
+            checkAccessToBuilding(character, building)
 
+            if (craftProcess.finish_at <= Date.now()) {
+                throw new Error("Craft process cannot be cancelled after craft time has passed")
+            }
+        }
+
+        if (craftProcess.is_finished) {
+            throw new Error("Craft process was already finished or cancelled")
+        }
+
+        // Return resources to the building
+        await building.editResources(craftProcess.used_resources)
+
+        // Mark craft process as cancelled
+        craftProcess.is_finished = true;
+        craftProcess.status_id = craftProcessStatusIds[force ? "Cancelled" : "Cancelled (Forced)"];
+        await building.save();
+
+        return true
+    } catch (e) {
+        if (throwException) throw e;
+        return false;
+    }
 }
 
-const finishCraft = (character, building, craftProcess, force = false) => {
+const finishCraft = async (character, building, craftProcess, force = false, throwException = true) => {
+    try {
+        if (!force) {
+            // Character must have access to the building
+            checkAccessToBuilding(character, building)
 
+            if (craftProcess.finish_at > Date.now()) {
+                throw new Error("Craft process cannot be finished before craft time has passed")
+            }
+        }
+
+        if (craftProcess.is_finished) {
+            throw new Error("Craft process was already finished or cancelled")
+        }
+
+        switch (craftProcess.crafting_by) {
+            case "Recipe": {
+                // Add crafted resources to the building
+                const recipe = await model("Recipe").findById(craftProcess.crafting_id);
+                await building.editResources([{
+                    _id: recipe.resource_id,
+                    amount: craftProcess.quantity
+                }])
+                break;
+            }
+            case "Blueprint": {
+                if (force) {
+                    throw new Error("Craft by blueprint cannot be forcefully finished")
+                }
+                // Increase quality level of blueprint entity
+                const blueprintEntity = await model("BlueprintEntity").findById(craftProcess.blueprint_entity_id);
+                blueprintEntity.quality += 1;
+                await blueprintEntity.save();
+
+                // todo: Request MC server to give crafted item
+                break;
+            }
+            default: throw new Error("Trying to process unknown type of craft process")
+        }
+
+        // Mark craft process as finished
+        craftProcess.is_finished = true;
+        craftProcess.status_id = craftProcessStatusIds[force ? "Finished" : "Finished (Forced)"];
+        await building.save();
+
+        return true;
+    } catch (e) {
+        if (throwException) throw e;
+        return false;
+    }
 }
 
 module.exports.startByBlueprint = startCraftByBlueprint;

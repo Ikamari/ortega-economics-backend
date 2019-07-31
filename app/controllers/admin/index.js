@@ -3,7 +3,8 @@ const { model }  = require("mongoose");
 // Admin model controller factory
 const ModelController = require("./ModelController");
 // Controllers
-const ProductionController =require("./ProductionController");
+const ProductionController = require("./ProductionController");
+const CraftController      = require("./CraftController");
 
 // Models controllers
 module.exports.BlueprintEntityModelController = (new ModelController).getRouter(model("BlueprintEntity"));
@@ -18,4 +19,5 @@ module.exports.ResourceModelController        = (new ModelController).getRouter(
 module.exports.TraitModelController           = (new ModelController).getRouter(model("Trait"));
 
 // Jobs controllers
-module.exports.ProductionController = (new ProductionController()).getRouter()
+module.exports.ProductionController = (new ProductionController()).getRouter();
+module.exports.CraftController      = (new CraftController()).getRouter();

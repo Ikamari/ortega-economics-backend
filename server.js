@@ -8,8 +8,8 @@ require("./app/models");
 // Schedule all jobs
 require("./app/jobs")
 
-const hostname = configProps[process.env.NODE_ENV].hostname;
-const port     = configProps[process.env.NODE_ENV].port;
+const hostname = configProps[process.env.NODE_ENV || "prod"].hostname;
+const port     = configProps[process.env.NODE_ENV || "prod"].port;
 
 const onDBConnectionSuccess = () => {
     global.isReady = true;

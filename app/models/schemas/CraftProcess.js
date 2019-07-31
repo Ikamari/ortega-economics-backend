@@ -6,11 +6,24 @@ const ResourceSchema = require("../schemas/Resource");
 // Validators
 const { exists, existsIn } = require("../../validators/General");
 
+const STATUS_IDS = {
+    1: "Crafting",           "Crafting": 1,
+    2: "Finished",           "Finished": 2,
+    3: "Finished (Forced)",  "Finished (Forced)": 3,
+    4: "Cancelled",          "Cancelled": 4,
+    5: "Cancelled (Forced)", "Cancelled (Forced)": 5
+};
+
 const CraftProcessSchema = new Schema({
     crafting_id: {
         validate: existsIn(["Recipe", "Blueprint"]),
         type: Schema.Types.ObjectId,
         required: true
+    },
+    blueprint_entity_id: {
+        validate: exists("BlueprintEntity"),
+        type: Schema.Types.ObjectId,
+        default: null
     },
     crafting_by: {
         validate: {
@@ -19,6 +32,10 @@ const CraftProcessSchema = new Schema({
         },
         type: String,
         required: true
+    },
+    quality: {
+        type: Number,
+        default: null
     },
     quantity: {
         type: Int32,
@@ -39,6 +56,11 @@ const CraftProcessSchema = new Schema({
         validate: exists("Character"),
         type: Schema.Types.ObjectId,
         required: true
+    },
+    crafting_fraction_id: {
+        validate: exists("Fraction"),
+        type: Schema.Types.ObjectId,
+        default: null
     },
     crafting_characters: {
         validate: exists("Character"),
@@ -66,7 +88,13 @@ const CraftProcessSchema = new Schema({
         type: Boolean,
         default: false,
         required: true
+    },
+    status_id: {
+        type: Int32,
+        default: STATUS_IDS["Crafting"],
+        required: true
     }
 });
 
-module.exports = CraftProcessSchema;
+module.exports           = CraftProcessSchema;
+module.exports.statusIds = STATUS_IDS;

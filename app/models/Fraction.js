@@ -174,15 +174,16 @@ FractionSchema.virtual("free_members").get(async function() {
     // Get ObjectID of all busy members (that currently participate in craft)
     buildings.map((building) => {
         building.craft_processes.map((craftProcess) => {
-            craftProcess.crafting_characters.map((craftingCharacter) => {
-                busyMembers.push(craftingCharacter._id)
+            if (craftProcess.is_finished) return;
+            craftProcess.crafting_characters.map((craftingCharacterId) => {
+                busyMembers.push(craftingCharacterId.toString())
             })
         })
     })
 
     // Get free members
     members.map((member) => {
-        if (!busyMembers.includes(member._id)) freeMembers.push(member)
+        if (!busyMembers.includes(member._id.toString())) freeMembers.push(member)
     })
 
     return freeMembers

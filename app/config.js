@@ -5,7 +5,8 @@
  */
 module.exports.getConfigProp = (path, useEnvironment = true) => {
     const pathParts = path.split(".");
-    let property    = global.configProps[useEnvironment ? process.env.NODE_ENV : pathParts[0]];
+    const env       = useEnvironment ? (process.env.NODE_ENV || "prod") : pathParts[0]
+    let property    = global.configProps[env];
 
     if (!property) {
         throw new Error(`Requested undefined config property "${path}"`)

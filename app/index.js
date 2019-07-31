@@ -14,10 +14,12 @@ app.use(bodyParser.json());
 
 // Admin controllers
 app.use("/admin/jobs", AdminControllers.ProductionController)
+app.use("/admin/craft", AdminControllers.CraftController)
 
 // Admin model controllers
 app.use("/admin/blueprint-entities", AdminControllers.BlueprintEntityModelController);
 app.use("/admin/blueprints",         AdminControllers.BlueprintModelController);
+app.use("/admin/recipes",            AdminControllers.RecipeModelController);
 app.use("/admin/buildings",          AdminControllers.BuildingModelController);
 app.use("/admin/facility-types",     AdminControllers.FacilityTypeModelController);
 app.use("/admin/fractions",          AdminControllers.FractionModelController);

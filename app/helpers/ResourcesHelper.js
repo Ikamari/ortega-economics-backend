@@ -21,11 +21,21 @@ const sortResources = (resources, direction = "asc") => {
 }
 
 const invertResources = (resources) => {
-    return resources.map(function (resource, key) {
-        this[key].amount *= -1
+    resources.forEach(function (resource, index) {
+        this[index].amount *= -1
     }, resources);
+    return resources;
+}
+
+const countResources = (resources) => {
+    let amount = 0;
+    resources.map((resource) => {
+        amount += resource.amount;
+    })
+    return amount;
 }
 
 module.exports.sortResources   = sortResources;
 module.exports.mergeResources  = mergeResources;
 module.exports.invertResources = invertResources;
+module.exports.countResources  = countResources;
