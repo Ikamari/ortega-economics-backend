@@ -9,7 +9,10 @@
     "start-win": "set NODE_ENV=prod&& node server.js",
     "start-dev-win": "set NODE_ENV=dev&& node server.js",
     "watch": "NODE_ENV=dev nodemon server.js localhost 3000",
-    "watch-win": "set NODE_ENV=dev&& nodemon server.js localhost 3000"
+    "watch-win": "set NODE_ENV=dev&& nodemon server.js localhost 3000",
+    "migrate:create": "migrate create -d",
+    "migrate:down": "migrate down -d",
+    "migrate:list": "migrate list -d"
   },
   "repository": {
     "type": "git",
@@ -26,6 +29,7 @@
     "express": "^4.16.4",
     "express-validator": "^6.1.1",
     "method-override": "^3.0.0",
+    "migrate-mongoose": "^4.0.0",
     "moment": "^2.24.0",
     "mongodb": "^3.2.2",
     "mongoose": "^5.5.1",
