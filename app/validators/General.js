@@ -61,7 +61,7 @@ const includes = (array) => {
     }
 
     return {
-        validator: (value) => (array.includes(value)),
+        validator: (value) => (array.includes(value.toString())),
         message: props => `${props.path} must be equal to:${array.map((value) => (" " + value))}`
     }
 }

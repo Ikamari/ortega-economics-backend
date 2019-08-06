@@ -7,7 +7,7 @@ const { hasObjectId } = require("../helpers/ObjectIdHelper");
 // Validators
 const { exists } = require("../validators/General");
 // Schemas
-const FacilitySchema = require("./schemas/Facility")
+const FacilityEntitySchema = require("./schemas/FacilityEntity")
 const CraftProcessSchema = require("./schemas/CraftProcess")
 
 const ResourceTurnoverSchema = new Schema({
@@ -77,7 +77,7 @@ const BuildingSchema = new Schema({
         validate: exists("Resource")
     },
     facilities: {
-        type: [FacilitySchema],
+        type: [FacilityEntitySchema],
         required: true,
         default: []
     },
@@ -126,8 +126,11 @@ BuildingSchema.virtual("free_facilities").get(function() {
     let freeFacilities = [];
 
     this.facilities.map((facility) => {
-        const isFree = this.craft_processes.some((craftProcess) => {
-            return !craftProcess.is_finished && hasObjectId(craftProcess.crafting_facilities, facility._id);
+        let isFree = true;
+        this.craft_processes.some((craftProcess) => {
+            if (!craftProcess.is_finished && hasObjectId(craftProcess.crafting_facilities, facility._id)) {
+                return isFree = false;
+            }
         })
         if (isFree) {
             freeFacilities.push(facility)

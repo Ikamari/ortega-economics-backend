@@ -21,7 +21,7 @@ app.use("/admin/blueprint-entities", AdminControllers.BlueprintEntityModelContro
 app.use("/admin/blueprints",         AdminControllers.BlueprintModelController);
 app.use("/admin/recipes",            AdminControllers.RecipeModelController);
 app.use("/admin/buildings",          AdminControllers.BuildingModelController);
-app.use("/admin/facility-types",     AdminControllers.FacilityTypeModelController);
+app.use("/admin/facilities",     AdminControllers.FacilityModelController);
 app.use("/admin/fractions",          AdminControllers.FractionModelController);
 app.use("/admin/perks",              AdminControllers.PerkModelController);
 app.use("/admin/characters",         AdminControllers.CharacterModelController);

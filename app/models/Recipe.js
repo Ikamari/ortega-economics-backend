@@ -1,9 +1,12 @@
 // Database
 const { Schema, model } = require("mongoose");
+const Int32 = require("mongoose-int32");
+// Models
+const { TYPE_IDS: facilityTypeIds } = require("./Facility");
 // Schemas
 const ResourceSchema = require("./schemas/Resource");
 // Validators
-const { exists } = require("../validators/General");
+const { exists, includes } = require("../validators/General");
 
 const RecipeModel = model("Recipe", new Schema({
     name: {
@@ -25,10 +28,14 @@ const RecipeModel = model("Recipe", new Schema({
         required: true,
         default: []
     },
-    required_facility: {
-        validate: exists("FacilityType"),
-        type: Schema.Types.ObjectId,
-        required: true
+    required_facility_type_id: {
+        validate: includes(Object.keys(facilityTypeIds)),
+        type: Int32
+    },
+    amount: {
+        type: Int32,
+        required: true,
+        default: 1
     },
     // In minutes
     craft_time: {

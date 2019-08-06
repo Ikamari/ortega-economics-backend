@@ -10,9 +10,9 @@
     "start-dev-win": "set NODE_ENV=dev&& node server.js",
     "watch": "NODE_ENV=dev nodemon server.js localhost 3000",
     "watch-win": "set NODE_ENV=dev&& nodemon server.js localhost 3000",
-    "migrate:create": "migrate create -d",
-    "migrate:down": "migrate down -d",
-    "migrate:list": "migrate list -d"
+    "migration:create": "migrate create -d mongodb://localhost:27017/economy",
+    "migration:down": "migrate down -d mongodb://localhost:27017/economy",
+    "migration:list": "migrate list -d mongodb://localhost:27017/economy"
   },
   "repository": {
     "type": "git",

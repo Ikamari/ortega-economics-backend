@@ -96,5 +96,5 @@ const CraftProcessSchema = new Schema({
     }
 });
 
-module.exports           = CraftProcessSchema;
-module.exports.statusIds = STATUS_IDS;
+module.exports = CraftProcessSchema;
+module.exports.STATUS_IDS = STATUS_IDS;

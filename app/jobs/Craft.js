@@ -6,7 +6,8 @@ const { hasObjectId } = require("../helpers/ObjectIdHelper");
 // Moment
 const moment = require("moment");
 // Models
-const { statusIds: craftProcessStatusIds } = require("../models/schemas/CraftProcess");
+const { getFacilitiesMap } = require("../models/Facility");
+const { STATUS_IDS: craftProcessStatusIds } = require("../models/schemas/CraftProcess");
 
 // "Quality" levels
 const
@@ -56,31 +57,35 @@ class CraftProcessCreator {
     }
 
     // Check whether building has all required facilities (at least for poor quality level) in it
-    checkRequiredFacilities() {
-        const freeFacilities     = this.building.free_facilities;
-        const requiredFacilities = this.craftingBy === "Blueprint" ? this.blueprint.required_facilities : this.recipe.required_facility;
+    async checkRequiredFacilities() {
+        const freeFacilities = this.building.free_facilities;
+        const requiredFacilities = this.craftingBy === "Blueprint" ? this.blueprint.required_facilities : [];
+        const requiredFacilityTypeId = this.craftingBy === "Recipe" ? this.recipe.required_facility_type_id : null;
 
-        if (requiredFacilities.length === 0) {
+        if (this.craftingBy === "Blueprint" && requiredFacilities.length === 0) {
             this.facilitiesLevel = BASIC_LEVEL;
+            return;
+        } else if (this.craftingBy === "Recipe" && requiredFacilityTypeId === null) {
             return;
         }
 
         if (this.craftingBy === "Recipe") {
+            const facilitiesMap = await getFacilitiesMap("_id");
             freeFacilities.some((facility) => {
-                if (requiredFacilities.equals(facility.facility_type_id)) {
-                    this.facilitiesToUse.push(facility._id)
+                if (requiredFacilityTypeId === facilitiesMap[facility.facility_id.toString()].type_id) {
+                    this.facilitiesToUse.push(facility._id);
                     return true;
                 }
             })
             if (this.facilitiesToUse.length > 0) return;
-            throw new Error("Building doesn't have enough of free required facilities");
+            throw new Error("Building doesn't have free facility of required type");
         }
 
         requiredFacilities.some((requirement) => {
             let availableFacilities = {}; // Used to skip repeating facilities of same type
             freeFacilities.some((facility) => {
-                if (requiredFacilities.includes(facility.facility_type_id) && !facility.facility_type_id in availableFacilities) {
-                    availableFacilities[facility.facility_type_id] = facility._id
+                if (requiredFacilities.includes(facility.facility_id) && !facility.facility_id in availableFacilities) {
+                    availableFacilities[facility.facility_id] = facility._id
                 }
             })
 
@@ -226,7 +231,7 @@ class CraftProcessCreator {
 
             await this.checkRequiredPerks();
             this.defineBlueprintQuality();
-            this.checkRequiredFacilities();
+            await this.checkRequiredFacilities();
             this.checkRequiredResources();
             this.defineCraftingTime();
 
@@ -252,7 +257,7 @@ class CraftProcessCreator {
             this.recipe     = recipe;
             this.quantity   = quantity;
 
-            this.checkRequiredFacilities();
+            await this.checkRequiredFacilities();
             this.checkRequiredResources();
             this.defineCraftingTime();
 
@@ -347,7 +352,7 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
                 const recipe = await model("Recipe").findById(craftProcess.crafting_id);
                 await building.editResources([{
                     _id: recipe.resource_id,
-                    amount: craftProcess.quantity
+                    amount: craftProcess.quantity * recipe.amount
                 }])
                 break;
             }

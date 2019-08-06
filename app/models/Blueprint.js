@@ -12,7 +12,7 @@ const RequiredFacilitiesSchema = new Schema({
         required: true
     },
     facilities: {
-        validate: exists("FacilityType"),
+        validate: exists("Facility"),
         type: [Schema.Types.ObjectId],
         required: true,
         default: []
@@ -27,8 +27,7 @@ const BlueprintModel = model("Blueprint", new Schema({
     },
     item_id: {
         type: String,
-        required: true,
-        default: "1"
+        required: true
     },
     time_multiplier: {
         type: Number,
