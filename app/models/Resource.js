@@ -19,19 +19,4 @@ const ResourceModel = model("Resource", new Schema({
     }
 }));
 
-const getResourcesMap = (propertyToUse = "name") => {
-    return new Promise((resolve, reject) =>
-        model("Resource").find({})
-            .then((resources) => {
-                const resourcesMap = {};
-                resources.map((resource) => {
-                    resourcesMap[propertyToUse === "_id" ? resource._id.toString() : resource[propertyToUse]] = resource;
-                });
-                resolve(resourcesMap);
-            })
-            .catch(error => reject(error))
-    )
-};
-
 module.exports = ResourceModel;
-module.exports.getResourcesMap = getResourcesMap;

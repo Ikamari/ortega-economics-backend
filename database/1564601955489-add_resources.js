@@ -137,7 +137,7 @@ const resources = [
         max_price: 50
     },
     {
-        name: "Энергоячейки",
+        name: "Энергоячейка",
         min_price: 50,
         max_price: 150
     },

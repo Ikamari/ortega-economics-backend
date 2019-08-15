@@ -9,7 +9,7 @@ const moment = require("moment");
 const { getFacilitiesMap } = require("../models/Facility");
 const { STATUS_IDS: craftProcessStatusIds } = require("../models/schemas/CraftProcess");
 
-// "Quality" levels
+// Quality levels
 const
     POOR_LEVEL    = 0,
     BASIC_LEVEL   = 0.25,
@@ -69,6 +69,7 @@ class CraftProcessCreator {
             return;
         }
 
+        // todo: Check facility type id as object id
         if (this.craftingBy === "Recipe") {
             const facilitiesMap = await getFacilitiesMap("_id");
             freeFacilities.some((facility) => {
