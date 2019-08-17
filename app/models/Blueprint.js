@@ -12,8 +12,8 @@ const RequiredFacilitiesSchema = new Schema({
         required: true
     },
     facilities: {
-        validate: exists("Facility"),
         type: [Schema.Types.ObjectId],
+        validate: exists("Facility"),
         required: true,
         default: []
     }
@@ -45,8 +45,8 @@ const BlueprintModel = model("Blueprint", new Schema({
         default: []
     },
     required_perks: {
-        validate: exists("Perk"),
         type: [Schema.Types.ObjectId],
+        validate: exists("Perk"),
         required: true,
         default: []
     }

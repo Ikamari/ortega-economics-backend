@@ -10,13 +10,13 @@ const CharacterModel = model("Character", new Schema({
         unique: true
     },
     fraction_id: {
-        validate: exists("Fraction"),
         type: Schema.Types.ObjectId,
+        validate: exists("Fraction"),
         default: null
     },
     perks: {
-        validate: exists("Perk"),
         type: [Schema.Types.ObjectId],
+        validate: exists("Perk"),
         required: true,
         default: []
     }

@@ -6,8 +6,8 @@ const { exists } = require("../../validators/General");
 
 const ResourceSchema = new Schema({
     _id: {
-        validate: exists("Resource"),
         type: Schema.Types.ObjectId,
+        validate: exists("Resource"),
         required: true
     },
     amount: {

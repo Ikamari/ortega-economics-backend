@@ -17,8 +17,8 @@ const RecipeModel = model("Recipe", new Schema({
         default: null
     },
     resource_id: {
-        validate: exists("Resource"),
         type: String,
+        validate: exists("Resource"),
         default: null
     },
     required_resources: {
@@ -27,8 +27,8 @@ const RecipeModel = model("Recipe", new Schema({
         default: []
     },
     required_facility_type_id: {
-        validate: exists("FacilityType"),
-        type: Int32
+        type: Schema.Types.ObjectId,
+        validate: exists("FacilityType")
     },
     tech_tier: {
         type: Int32,

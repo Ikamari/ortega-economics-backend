@@ -30,9 +30,16 @@ const facilityTypes = [
  * Make any changes you need to make to the database here
  */
 async function up () {
-    await facilityTypes.map(async (facilityType) => {
-        await model("FacilityType").create(facilityType);
-    })
+    return new Promise(async (resolve, reject) => {
+        await facilityTypes.map(async (facilityType) => {
+            try {
+                await model("FacilityType").create(facilityType);
+            } catch (e) {
+                reject(e);
+            }
+        })
+        resolve(true);
+    });
 }
 
 /**

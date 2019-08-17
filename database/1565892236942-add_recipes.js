@@ -221,33 +221,41 @@ async function up () {
     const resourcesMap = await getRecordsMap("Resource");
     const facilityTypesMap = await getRecordsMap("FacilityType");
 
-    await recipes.map(async (recipe) => {
-        const requiredResources = [];
+    return new Promise(async (resolve, reject) => {
+        await recipes.map(async (recipe) => {
+            try {
+                const requiredResources = [];
 
-        // Check whether required resources are valid
-        recipe.required_resources.map((requiredResource) => {
-            const requiredResourceId = resourcesMap[requiredResource.name]
-            if (!requiredResource) throw new Error("Trying to use unknown resource");
-            requiredResources.push({ _id: requiredResourceId, amount: requiredResource.amount })
-        });
+                // Check whether required resources are valid
+                recipe.required_resources.map((requiredResource) => {
+                    const requiredResourceId = resourcesMap[requiredResource.name]
+                    if (!requiredResource) throw new Error("Trying to use unknown resource");
+                    requiredResources.push({_id: requiredResourceId, amount: requiredResource.amount})
+                });
 
-        // Check whether recipe result is valid
-        const resultId = resourcesMap[recipe.name];
-        if (!resultId) throw new Error("Trying to use unknown resource");
+                // Check whether recipe result is valid
+                const result = resourcesMap[recipe.name];
+                if (!result) throw new Error("Trying to use unknown resource");
 
-        // Check whether facility type is valid
-        const facilityTypeId = facilityTypesMap[recipe.required_facility_type];
-        if (!facilityTypeId) throw new Error("Trying to use unknown facility type");
-        
-        await model("Recipe").create({
-            name: recipe.recipe_name,
-            resource_id: resultId,
-            required_resources: requiredResources,
-            required_facility_type_id: facilityTypeId,
-            amount: recipe.amount,
-            craft_time: recipe.craft_time / 60
-        });
-    })
+                // Check whether facility type is valid
+                const facilityTypeId = facilityTypesMap[recipe.required_facility_type];
+                if (!facilityTypeId) throw new Error("Trying to use unknown facility type");
+
+                await model("Recipe").create({
+                    name: recipe.recipe_name,
+                    resource_id: result._id,
+                    required_resources: requiredResources,
+                    required_facility_type_id: facilityTypeId,
+                    amount: recipe.amount,
+                    craft_time: recipe.craft_time / 60,
+                    tech_tier: recipe.tech_tier
+                });
+            } catch (e) {
+                reject(e);
+            }
+            resolve(true);
+        })
+    });
 }
 
 /**

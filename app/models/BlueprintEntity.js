@@ -6,8 +6,8 @@ const { exists } = require("../validators/General");
 
 const BlueprintEntitySchema = new Schema({
     blueprint_id: {
-        validate: exists("Blueprint"),
         type: Schema.Types.ObjectId,
+        validate: exists("Blueprint"),
         required: true
     },
     quality: {

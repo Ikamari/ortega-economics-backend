@@ -126,17 +126,25 @@ const facilities = [
 async function up () {
     const facilityTypesMap = await getRecordsMap("FacilityType");
 
-    await facilities.map(async (facility) => {
-        // Check whether facility type is valid
-        const facilityTypeId = facilityTypesMap[facility.facility_type];
-        if (!facilityTypeId) throw new Error("Trying to use unknown facility type");
+    return new Promise(async (resolve, reject) => {
+        await facilities.map(async (facility) => {
+            try {
+                // Check whether facility type is valid
+                const facilityType = facilityTypesMap[facility.facility_type];
+                if (!facilityType) throw new Error("Trying to use unknown facility type");
 
-        await model("Facility").create({
-            name: facility.name,
-            quality_level: facility.quality_level,
-            type_id: facilityTypeId
-        });
-    })
+                await model("Facility").create({
+                    name: facility.name,
+                    quality_level: facility.quality_level,
+                    tech_tier: facility.tech_tier,
+                    type_id: facilityType._id
+                });
+            } catch (e) {
+                reject(e);
+            }
+        })
+        resolve(true);
+    });
 }
 
 /**

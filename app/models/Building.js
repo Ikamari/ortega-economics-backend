@@ -33,13 +33,13 @@ const ResourceTurnoverSchema = new Schema({
 
 const BuildingSchema = new Schema({
     fraction_id: {
-        validate: exists("Fraction"),
         type: Schema.Types.ObjectId,
+        validate: exists("Fraction"),
         default: null
     },
     character_id: {
-        validate: exists("Character"),
         type: Schema.Types.ObjectId,
+        validate: exists("Character"),
         default: null
     },
     name: {
@@ -72,9 +72,9 @@ const BuildingSchema = new Schema({
     resources: {
         type: Map,
         of: Int32,
+        validate: exists("Resource"),
         required: true,
         default: {},
-        validate: exists("Resource")
     },
     facilities: {
         type: [FacilityEntitySchema],

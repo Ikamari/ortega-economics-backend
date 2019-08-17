@@ -1,12 +1,15 @@
+// Database
+const { model } = require("mongoose");
+
 const getRecordsMap = (modelName, propertyToUse = "name") => {
     return new Promise((resolve, reject) =>
         model(modelName).find({})
-            .then((resources) => {
-                const facilitiesMap = {};
-                resources.map((facility) => {
-                    facilitiesMap[propertyToUse === "_id" ? facility._id.toString() : facility[propertyToUse]] = facility;
+            .then((records) => {
+                const recordsMap = {};
+                records.map((record) => {
+                    recordsMap[propertyToUse === "_id" ? record._id.toString() : record[propertyToUse]] = record;
                 });
-                resolve(facilitiesMap);
+                resolve(recordsMap);
             })
             .catch(error => reject(error))
     )

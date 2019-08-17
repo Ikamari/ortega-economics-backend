@@ -243,9 +243,16 @@ const resources = [
  * Make any changes you need to make to the database here
  */
 async function up () {
-    await resources.map(async (resource) => {
-        await model("Resource").create(resource);
-    })
+    return new Promise(async (resolve, reject) => {
+        await resources.map(async (resource) => {
+            try {
+                await model("Resource").create(resource);
+            } catch (e) {
+                reject(e);
+            }
+        })
+        resolve(true)
+    });
 }
 
 /**

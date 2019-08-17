@@ -5,8 +5,8 @@ const { exists } = require("../../validators/General");
 
 const FacilityEntitySchema = new Schema({
     facility_id: {
-        validate: exists("Facility"),
         type: Schema.Types.ObjectId,
+        validate: exists("Facility"),
         required: true
     }
 });

@@ -46,8 +46,8 @@ const FractionSchema = new Schema({
         default: []
     },
     traits: {
-        validate: exists("Trait"),
         type: [Schema.Types.ObjectId],
+        validate: exists("Trait"),
         required: true,
         default: []
     }

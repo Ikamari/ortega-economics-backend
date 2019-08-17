@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=prod node server.js",
-    "start-dev": "NODE_ENV=dev node server.js",
-    "start-win": "set NODE_ENV=prod&& node server.js",
-    "start-dev-win": "set NODE_ENV=dev&& node server.js",
+    "start:dev": "NODE_ENV=dev node server.js",
+    "start:windows": "set NODE_ENV=prod&& node server.js",
+    "start:windows-dev": "set NODE_ENV=dev&& node server.js",
     "watch": "NODE_ENV=dev nodemon server.js localhost 3000",
-    "watch-win": "set NODE_ENV=dev&& nodemon server.js localhost 3000",
+    "watch:windows": "set NODE_ENV=dev&& nodemon server.js localhost 3000",
+    "migration:up": "migrate up -d mongodb://localhost:27017/economy",
     "migration:create": "migrate create -d mongodb://localhost:27017/economy",
     "migration:down": "migrate down -d mongodb://localhost:27017/economy",
     "migration:list": "migrate list -d mongodb://localhost:27017/economy"

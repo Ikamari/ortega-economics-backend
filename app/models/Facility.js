@@ -20,6 +20,7 @@ const FacilityModel = model("Facility", new Schema({
         required: true
     },
     type_id: {
+        type: Schema.Types.ObjectId,
         validate: exists("FacilityType"),
         required: true
     }

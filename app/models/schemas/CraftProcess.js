@@ -16,21 +16,21 @@ const STATUS_IDS = {
 
 const CraftProcessSchema = new Schema({
     crafting_id: {
-        validate: existsIn(["Recipe", "Blueprint"]),
         type: Schema.Types.ObjectId,
+        validate: existsIn(["Recipe", "Blueprint"]),
         required: true
     },
     blueprint_entity_id: {
-        validate: exists("BlueprintEntity"),
         type: Schema.Types.ObjectId,
+        validate: exists("BlueprintEntity"),
         default: null
     },
     crafting_by: {
+        type: String,
         validate: {
             validator: (value) => (value === "Recipe" || value === "Blueprint"),
             message: props => `${props.path} must be "Recipe" or "Blueprint"`
         },
-        type: String,
         required: true
     },
     quality: {
@@ -53,25 +53,25 @@ const CraftProcessSchema = new Schema({
         required: true
     },
     creator_character_id: {
-        validate: exists("Character"),
         type: Schema.Types.ObjectId,
+        validate: exists("Character"),
         required: true
     },
     crafting_fraction_id: {
-        validate: exists("Fraction"),
         type: Schema.Types.ObjectId,
+        validate: exists("Fraction"),
         default: null
     },
     crafting_characters: {
-        validate: exists("Character"),
         type: [Schema.Types.ObjectId],
+        validate: exists("Character"),
         default: [],
         required: true
     },
     crafting_facilities: {
+        type: [Schema.Types.ObjectId],
         // todo: check existence of nested document
         // validate: exists("Facility"),
-        type: [Schema.Types.ObjectId],
         default: [],
         required: true
     },
