@@ -56,11 +56,9 @@ class CraftProcessCreator {
         }
     }
 
-    // Check whether building has all required facilities (at least for poor quality level) in it
+    // Check whether building has all required facilities
     async checkRequiredFacilities() {
-        const freeFacilities = this.building.free_facilities;
         const requiredFacilities = this.craftingBy === "Blueprint" ? this.blueprint.required_facilities : [];
-        const requiredFacilityTypeId = this.craftingBy === "Recipe" ? this.recipe.required_facility_type_id : null;
 
         if (this.craftingBy === "Blueprint" && requiredFacilities.length === 0) {
             this.facilitiesLevel = BASIC_LEVEL;
@@ -69,11 +67,12 @@ class CraftProcessCreator {
             return;
         }
 
-        // todo: Check facility type id as object id
         if (this.craftingBy === "Recipe") {
-            const facilitiesMap = await getFacilitiesMap("_id");
-            freeFacilities.some((facility) => {
-                if (requiredFacilityTypeId === facilitiesMap[facility.facility_id.toString()].type_id) {
+            this.building.freeFacilities(null, "tech_tier", "ASC").some((freeFacility) => {
+                if (
+                    this.recipe.required_facility_type_id.equals(freeFacility.properties.type_id) &&
+                    this.recipe.tech_tier <= freeFacility.properties.tech_tier
+                ) {
                     this.facilitiesToUse.push(facility._id);
                     return true;
                 }
@@ -82,9 +81,10 @@ class CraftProcessCreator {
             throw new Error("Building doesn't have free facility of required type");
         }
 
+        // todo: If multiple facilities are required, get avg. quality
         requiredFacilities.some((requirement) => {
             let availableFacilities = {}; // Used to skip repeating facilities of same type
-            freeFacilities.some((facility) => {
+            this.building.freeFacilities.some((facility) => {
                 if (requiredFacilities.includes(facility.facility_id) && !facility.facility_id in availableFacilities) {
                     availableFacilities[facility.facility_id] = facility._id
                 }

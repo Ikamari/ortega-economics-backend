@@ -17,7 +17,7 @@ const RecipeModel = model("Recipe", new Schema({
         default: null
     },
     resource_id: {
-        type: String,
+        type: Schema.Types.ObjectId,
         validate: exists("Resource"),
         default: null
     },

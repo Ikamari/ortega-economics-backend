@@ -1,21 +1,19 @@
 // Database
 const { Schema, model } = require("mongoose");
+const Int32 = require("mongoose-int32");
 // Schemas
 const ResourceSchema = require("./schemas/Resource");
 // Validators
-const { exists, includes } = require("../validators/General");
+const { exists } = require("../validators/General");
 
 const RequiredFacilitiesSchema = new Schema({
-    quality_level: {
-        type: String,
-        validate: includes(["poor", "basic", "solid", "complex"]),
+    tech_tier: {
+        type: Int32,
         required: true
     },
-    facilities: {
-        type: [Schema.Types.ObjectId],
-        validate: exists("Facility"),
-        required: true,
-        default: []
+    facility_type_id: {
+        type: Schema.Types.ObjectId,
+        validate: exists("FacilityType")
     }
 })
 

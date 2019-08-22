@@ -123,22 +123,47 @@ BuildingSchema.virtual("fraction").get(async function () {
 })
 
 BuildingSchema.virtual("free_facilities").get(function() {
-    let freeFacilities = [];
+    return this.freeFacilities();
+})
 
+BuildingSchema.methods.freeFacilities = function(filter, sortBy, sortDirection = "ASC") {
+    if (this.populate() === undefined && (sortBy || filter)) {
+        throw new Error("facilities.properties must be populated in order to use this method with sort or filter")
+    }
+
+    let freeFacilities = [];
     this.facilities.map((facility) => {
+        if (!facility.is_active) return;
         let isFree = true;
+        // Facility shouldn't be present in any active craft process
         this.craft_processes.some((craftProcess) => {
             if (!craftProcess.is_finished && hasObjectId(craftProcess.crafting_facilities, facility._id)) {
                 return isFree = false;
             }
-        })
-        if (isFree) {
-            freeFacilities.push(facility)
+        });
+        if (isFree && filter instanceof Function) {
+            isFree = filter(facility);
         }
-    })
+        if (isFree) {
+            freeFacilities.push(facility);
+        }
+    });
 
-    return freeFacilities
-})
+    let direction;
+    switch (sortDirection.toUpperCase()) {
+        case "ASC":  direction = 1;  break;
+        case "DESC": direction = -1; break;
+        default: throw new Error("Trying to use incorrect sorting direction");
+    }
+
+    if (sortBy) {
+        freeFacilities.sort((a, b) => {
+            return ((a.properties[sortBy] > b.properties[sortBy]) ? 1 : ((b.properties[sortBy] > a.properties[sortBy]) ? -1 : 0)) * direction;
+        });
+    }
+
+    return freeFacilities;
+}
 
 BuildingSchema.methods.hasResources = function(resourcesToFind, throwException = true) {
     try {
