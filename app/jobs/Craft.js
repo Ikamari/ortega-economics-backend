@@ -6,7 +6,6 @@ const { hasObjectId } = require("../helpers/ObjectIdHelper");
 // Moment
 const moment = require("moment");
 // Models
-const { getFacilitiesMap } = require("../models/Facility");
 const { STATUS_IDS: craftProcessStatusIds } = require("../models/schemas/CraftProcess");
 
 // Quality levels
@@ -32,14 +31,14 @@ class CraftProcessCreator {
 
         this.quantity            = 1;
         this.resourcesMultiplier = 1;
-        this.craftingBy          = null; // Currently can by "Recipe" or "Blueprint"
-        this.craftingTime        = 0; // In minutes
+        this.craftingBy          = null; // Currently can be "Recipe" or "Blueprint"
+        this.craftingTime        = 0;    // In minutes
+        this.tech_tier_bonus     = 0;
 
-        // Properties below will be used in craft by blueprint
-        this.resourcesLevel  = null;
-        this.facilitiesLevel = null;
-        this.perksLevel      = null;
-        this.blueprintLevel  = null;
+        this.resourcesLevel  = 0;
+        this.facilitiesLevel = 0;
+        this.perksLevel      = 0;
+        this.blueprintLevel  = 0;
     }
 
     checkAccessToBuilding() {
@@ -58,73 +57,56 @@ class CraftProcessCreator {
 
     // Check whether building has all required facilities
     async checkRequiredFacilities() {
-        const requiredFacilities = this.craftingBy === "Blueprint" ? this.blueprint.required_facilities : [];
-
-        if (this.craftingBy === "Blueprint" && requiredFacilities.length === 0) {
-            this.facilitiesLevel = BASIC_LEVEL;
-            return;
-        } else if (this.craftingBy === "Recipe" && requiredFacilityTypeId === null) {
-            return;
-        }
+        const freeFacilities = this.building.freeFacilities(null, "tech_tier", "DESC");
 
         if (this.craftingBy === "Recipe") {
-            this.building.freeFacilities(null, "tech_tier", "ASC").some((freeFacility) => {
+            // Skip check of required facility if recipe doesn't have it
+            if (!this.recipe.required_facility_type_id) return;
+
+            // Check whether building has suitable free facilities
+            freeFacilities.some((freeFacility) => {
                 if (
                     this.recipe.required_facility_type_id.equals(freeFacility.properties.type_id) &&
                     this.recipe.tech_tier <= freeFacility.properties.tech_tier
                 ) {
-                    this.facilitiesToUse.push(facility._id);
+                    this.facilitiesToUse.push(freeFacility._id);
+                    this.tech_tier_bonus = freeFacility.properties.tech_tier - this.recipe.tech_tier;
                     return true;
                 }
-            })
+            });
+
+            // Check whether facility was found
             if (this.facilitiesToUse.length > 0) return;
             throw new Error("Building doesn't have free facility of required type");
         }
 
-        // todo: If multiple facilities are required, get avg. quality
-        requiredFacilities.some((requirement) => {
-            let availableFacilities = {}; // Used to skip repeating facilities of same type
-            this.building.freeFacilities.some((facility) => {
-                if (requiredFacilities.includes(facility.facility_id) && !facility.facility_id in availableFacilities) {
-                    availableFacilities[facility.facility_id] = facility._id
-                }
-            })
+        const requiredFacilities = this.blueprint.required_facilities;
+        // Skip check of required facilities if blueprint doesn't have them
+        if (requiredFacilities.length === 0) {
+            this.facilitiesLevel = BASIC_LEVEL;
+            return;
+        }
 
-            if (Object.keys(availableFacilities).length === freeFacilities.length) {
-                switch (requirement.quality_level) {
-                    case "poor": {
-                        if (this.facilitiesLevel < POOR_LEVEL) {
-                            this.facilitiesLevel = POOR_LEVEL;
-                            this.facilitiesToUse = availableFacilities.values()
-                        }
-                        break
-                    }
-                    case "basic": {
-                        if (this.facilitiesLevel < BASIC_LEVEL) {
-                            this.facilitiesLevel = BASIC_LEVEL;
-                            this.facilitiesToUse = availableFacilities.values()
-                        }
-                        break
-                    }
-                    case "solid": {
-                        if (this.facilitiesLevel < SOLID_LEVEL) {
-                            this.facilitiesLevel = SOLID_LEVEL;
-                            this.facilitiesToUse = availableFacilities.values()
-                        }
-                        break
-                    }
-                    case "complex": {
-                        this.facilitiesLevel = COMPLEX_LEVEL;
-                        this.facilitiesToUse = availableFacilities.values()
-                        return true;
-                    }
+        requiredFacilities.map((requiredFacility) => {
+            const hasFacility = freeFacilities.some((freeFacility) => {
+                if (
+                    requiredFacility.type_id.equals(freeFacility.properties.type_id) &&
+                    requiredFacility.tech_tier <= freeFacility.properties.tech_tier &&
+                    !(freeFacility._id.toString() in this.facilitiesToUse)
+                ) {
+                    this.facilitiesToUse.push(freeFacility._id.toString());
+                    this.facilitiesLevel += increaseQualityLevel(
+                        freeFacility.properties.quality_level,
+                        freeFacility.properties.tech_tier - requiredFacility.tech_tier
+                    );
+                    return true;
                 }
-            }
+            });
+            if (!hasFacility) throw new Error("Building doesn't have enough of free required facilities");
         })
 
-        if (this.facilitiesLevel === null) {
-            throw new Error("Building doesn't have enough of free required facilities");
-        }
+        // Get average quality level if multiple facilities were required
+        if (requiredFacilities.length > 1) this.facilitiesLevel /= requiredFacilities.length;
     }
 
     // Check whether defined participants has required perks and validate them
@@ -181,15 +163,20 @@ class CraftProcessCreator {
 
     // Define how long specific item will be crafting by checked characteristics (blueprint quality, perks traits, ...)
     defineCraftingTime() {
-        this.craftingTime = this.craftingBy === "Blueprint" ?
-            60 * (this.blueprint.time_multiplier * (this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel)) :
-            this.recipe.craft_time * this.quantity
+        if (this.craftingBy === "Recipe") {
+            this.craftingTime = this.recipe.craft_time * this.quantity;
+            // Decrease crafting time if craft process is using facility with tech tier higher than required
+            if (this.tech_tier_bonus === 1) this.craftingTime *= 0.80;
+            else if (this.tech_tier_bonus > 1) this.craftingTime *= 0.50;
+            return;
+        }
+        this.craftingTime = 60 * (this.blueprint.time_multiplier * (this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel));
     }
 
     // Check whether building has enough of resources
     checkRequiredResources() {
         this.requiredResources = (this.craftingBy === "Blueprint" ? this.blueprint : this.recipe).required_resources.slice();
-        const multiplier       = this.craftingBy === "Blueprint" ? this.resourcesMultiplier : this.quantity;
+        const multiplier = this.craftingBy === "Blueprint" ? this.resourcesMultiplier : this.quantity;
 
         // Use multiplier on resources
         this.requiredResources.map(function (resource, key) {
@@ -201,12 +188,16 @@ class CraftProcessCreator {
     }
 
     createCraftProcess() {
+        const qualityLevel = this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel;
+        // Craft cannot be started if quality level is too low
+        if (qualityLevel < BASIC_LEVEL) throw new Error("Overall quality is too low");
+
         this.building.craft_processes.push({
             crafting_id:          this.craftingBy === "Blueprint" ? this.blueprint._id : this.recipe._id,
             blueprint_entity_id:  this.craftingBy === "Blueprint" ? this.blueprintEntity._id : null,
             crafting_by:          this.craftingBy,
             quantity:             this.quantity,
-            quality:              this.craftingBy === "Blueprint" ? (this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel) : null,
+            quality_level:        this.craftingBy === "Blueprint" ? qualityLevel : null,
             // Clone current state of required resources to prevent saving unexpected changes
             used_resources:       JSON.parse(JSON.stringify(this.requiredResources)),
             resources_multiplier: this.resourcesMultiplier,
@@ -276,6 +267,18 @@ class CraftProcessCreator {
         }
     }
 
+}
+
+// todo: figure out whether there's a better way to do it
+const increaseQualityLevel = (qualityLevel, times = 1) => {
+    let increasedTimes = 0, increasedQualityLevel = qualityLevel;
+    while (increasedTimes < times) {
+        if (increasedQualityLevel < BASIC_LEVEL) increasedQualityLevel = BASIC_LEVEL;
+        else if (BASIC_LEVEL <= increasedQualityLevel < SOLID_LEVEL) increasedQualityLevel = SOLID_LEVEL
+        else if (SOLID_LEVEL <= increasedQualityLevel < COMPLEX_LEVEL) increasedQualityLevel = COMPLEX_LEVEL;
+        else return increasedQualityLevel
+    }
+    return increasedQualityLevel;
 }
 
 // Check whether character has permission to start the craft process in specific building

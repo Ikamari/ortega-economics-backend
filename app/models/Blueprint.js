@@ -11,7 +11,7 @@ const RequiredFacilitiesSchema = new Schema({
         type: Int32,
         required: true
     },
-    facility_type_id: {
+    type_id: {
         type: Schema.Types.ObjectId,
         validate: exists("FacilityType")
     }

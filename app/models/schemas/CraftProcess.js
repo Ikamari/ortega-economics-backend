@@ -33,7 +33,7 @@ const CraftProcessSchema = new Schema({
         },
         required: true
     },
-    quality: {
+    quality_level: {
         type: Number,
         default: null
     },
