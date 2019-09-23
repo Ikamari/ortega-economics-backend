@@ -229,7 +229,7 @@ async function up () {
                 // Check whether required resources are valid
                 recipe.required_resources.map((requiredResource) => {
                     const requiredResourceId = resourcesMap[requiredResource.name]
-                    if (!requiredResource) throw new Error("Trying to use unknown resource");
+                    if (!requiredResourceId) throw new Error("Trying to use unknown resource");
                     requiredResources.push({_id: requiredResourceId, amount: requiredResource.amount})
                 });
 
@@ -262,7 +262,7 @@ async function up () {
  * Make any changes that UNDO the up function side effects here (if possible)
  */
 async function down () {
-  // Write migration here
+
 }
 
 module.exports = { up, down };

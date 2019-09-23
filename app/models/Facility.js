@@ -10,6 +10,12 @@ const FacilityModel = model("Facility", new Schema({
         required: true,
         unique: true
     },
+    energy_consumption: {
+        type: Int32,
+        required: true,
+        min: 0,
+        default: 0
+    },
     quality_level: {
         type: Number,
         required: true,

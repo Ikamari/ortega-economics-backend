@@ -17,7 +17,7 @@ const facilities = [
         quality_level: BASIC_LEVEL
     },
     {
-        name: "Переносное лабораторное снар.",
+        name: "Переносное лабораторное снаряжение",
         facility_type: "Лабораторное",
         tech_tier: 1,
         quality_level: BASIC_LEVEL
@@ -43,24 +43,28 @@ const facilities = [
     {
         name: "Лабораторное рабочее место",
         facility_type: "Лабораторное",
+        energy_consumption: 5,
         tech_tier: 2,
         quality_level: SOLID_LEVEL
     },
     {
         name: "Автоматизированное лабораторное рабочее место",
         facility_type: "Лабораторное",
+        energy_consumption: 10,
         tech_tier: 3,
         quality_level: BASIC_LEVEL
     },
     {
         name: "Компьютерное оборудование",
         facility_type: "Компьютерное",
+        energy_consumption: 10,
         tech_tier: 0,
         quality_level: SOLID_LEVEL
     },
     {
         name: "Репликатор",
         facility_type: "Универсальное",
+        energy_consumption: 50,
         tech_tier: 2,
         quality_level: COMPLEX_LEVEL
     },
@@ -85,24 +89,28 @@ const facilities = [
     {
         name: "Автоматизированная мастерская",
         facility_type: "Инженерное",
+        energy_consumption: 20,
         tech_tier: 3,
         quality_level: SOLID_LEVEL
     },
     {
         name: "Химико-биологическая лаборатория",
         facility_type: "Лабораторное",
+        energy_consumption: 35,
         tech_tier: 3,
         quality_level: SOLID_LEVEL
     },
     {
         name: "Мегапликатор",
         facility_type: "Универсальное",
+        energy_consumption: 85,
         tech_tier: 3,
         quality_level: COMPLEX_LEVEL
     },
     {
         name: "Суперкомпьютер",
         facility_type: "Компьютерное",
+        energy_consumption: 25,
         tech_tier: 0,
         quality_level: COMPLEX_LEVEL
     },
@@ -135,6 +143,7 @@ async function up () {
 
                 await model("Facility").create({
                     name: facility.name,
+                    energy_consumption: facility.energy_consumption,
                     quality_level: facility.quality_level,
                     tech_tier: facility.tech_tier,
                     type_id: facilityType._id
@@ -151,7 +160,7 @@ async function up () {
  * Make any changes that UNDO the up function side effects here (if possible)
  */
 async function down () {
-  // Write migration here
+
 }
 
 module.exports = { up, down };

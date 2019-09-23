@@ -25,12 +25,14 @@ const BlueprintModel = model("Blueprint", new Schema({
     },
     item_id: {
         type: String,
-        required: true
+        // todo: uncomment when item ids will be available
+        // required: true
     },
-    time_multiplier: {
+    difficulty: {
         type: Number,
         required: true,
-        default: 1
+        default: 1,
+        min: 1
     },
     required_resources: {
         type: [ResourceSchema],

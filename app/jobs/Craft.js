@@ -56,6 +56,7 @@ class CraftProcessCreator {
     }
 
     // Check whether building has all required facilities
+    // todo: refactor me (repeating code)
     async checkRequiredFacilities() {
         const freeFacilities = this.building.freeFacilities(null, "tech_tier", "DESC");
 
@@ -64,7 +65,7 @@ class CraftProcessCreator {
             if (!this.recipe.required_facility_type_id) return;
 
             // Check whether building has suitable free facilities
-            freeFacilities.some((freeFacility) => {
+            const hasFacility = freeFacilities.some((freeFacility) => {
                 if (
                     this.recipe.required_facility_type_id.equals(freeFacility.properties.type_id) &&
                     this.recipe.tech_tier <= freeFacility.properties.tech_tier
@@ -75,8 +76,7 @@ class CraftProcessCreator {
                 }
             });
 
-            // Check whether facility was found
-            if (this.facilitiesToUse.length > 0) return;
+            if (!hasFacility) return;
             throw new Error("Building doesn't have free facility of required type");
         }
 
@@ -87,12 +87,11 @@ class CraftProcessCreator {
             return;
         }
 
-        requiredFacilities.map((requiredFacility) => {
+        const hasFacility = requiredFacilities.some((requiredFacility) => {
             const hasFacility = freeFacilities.some((freeFacility) => {
                 if (
                     requiredFacility.type_id.equals(freeFacility.properties.type_id) &&
-                    requiredFacility.tech_tier <= freeFacility.properties.tech_tier &&
-                    !(freeFacility._id.toString() in this.facilitiesToUse)
+                    requiredFacility.tech_tier <= freeFacility.properties.tech_tier
                 ) {
                     this.facilitiesToUse.push(freeFacility._id.toString());
                     this.facilitiesLevel += increaseQualityLevel(
@@ -102,11 +101,10 @@ class CraftProcessCreator {
                     return true;
                 }
             });
-            if (!hasFacility) throw new Error("Building doesn't have enough of free required facilities");
+            if (hasFacility) return true;
         })
 
-        // Get average quality level if multiple facilities were required
-        if (requiredFacilities.length > 1) this.facilitiesLevel /= requiredFacilities.length;
+        if (!hasFacility) throw new Error("Building doesn't have free facility of required type");
     }
 
     // Check whether defined participants has required perks and validate them
@@ -170,7 +168,7 @@ class CraftProcessCreator {
             else if (this.tech_tier_bonus > 1) this.craftingTime *= 0.50;
             return;
         }
-        this.craftingTime = 60 * (this.blueprint.time_multiplier * (this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel));
+        this.craftingTime = 60 * (this.blueprint.difficulty * (this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel));
     }
 
     // Check whether building has enough of resources
