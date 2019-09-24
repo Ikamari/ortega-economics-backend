@@ -6,14 +6,6 @@ const ResourceSchema = require("../schemas/Resource");
 // Validators
 const { exists, existsIn } = require("../../validators/General");
 
-const STATUS_IDS = {
-    1: "Crafting",           "Crafting": 1,
-    2: "Finished",           "Finished": 2,
-    3: "Finished (Forced)",  "Finished (Forced)": 3,
-    4: "Cancelled",          "Cancelled": 4,
-    5: "Cancelled (Forced)", "Cancelled (Forced)": 5
-};
-
 const CraftProcessSchema = new Schema({
     crafting_id: {
         type: Schema.Types.ObjectId,
@@ -89,12 +81,16 @@ const CraftProcessSchema = new Schema({
         default: false,
         required: true
     },
-    status_id: {
-        type: Int32,
-        default: STATUS_IDS["Crafting"],
+    is_failed: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    is_cancelled: {
+        type: Boolean,
+        default: false,
         required: true
     }
 });
 
 module.exports = CraftProcessSchema;
-module.exports.STATUS_IDS = STATUS_IDS;

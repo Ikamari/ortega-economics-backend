@@ -5,8 +5,7 @@ const { invertResources } = require("../helpers/ResourcesHelper");
 const { hasObjectId } = require("../helpers/ObjectIdHelper");
 // Moment
 const moment = require("moment");
-// Models
-const { STATUS_IDS: craftProcessStatusIds } = require("../models/schemas/CraftProcess");
+
 
 // Quality levels
 const
@@ -310,20 +309,18 @@ const cancelCraft = async (character, building, craftProcess, force = false, thr
             checkAccessToBuilding(character, building)
 
             if (craftProcess.finish_at <= Date.now()) {
-                throw new Error("Craft process cannot be cancelled after craft time has passed")
+                throw new Error("Craft process cannot be cancelled when craft time has passed")
             }
         }
 
-        if (craftProcess.is_finished) {
-            throw new Error("Craft process was already finished or cancelled")
+        if (craftProcess.is_finished || craftProcess.is_cancelled || craftProcess.is_failed) {
+            throw new Error("Craft process is finished / cancelled / failed")
         }
 
         // Return resources to the building
         await building.editResources(craftProcess.used_resources)
 
-        // Mark craft process as cancelled
-        craftProcess.is_finished = true;
-        craftProcess.status_id = craftProcessStatusIds[force ? "Cancelled" : "Cancelled (Forced)"];
+        craftProcess.is_cancelled = true;
         await building.save();
 
         return true
@@ -340,12 +337,12 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
             checkAccessToBuilding(character, building)
 
             if (craftProcess.finish_at > Date.now()) {
-                throw new Error("Craft process cannot be finished before craft time has passed")
+                throw new Error("Craft process cannot be finished until craft time has passed")
             }
         }
 
-        if (craftProcess.is_finished) {
-            throw new Error("Craft process was already finished or cancelled")
+        if (craftProcess.is_finished || craftProcess.is_cancelled || craftProcess.is_failed) {
+            throw new Error("Craft process is finished / cancelled / failed")
         }
 
         switch (craftProcess.crafting_by) {
@@ -375,10 +372,47 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
 
         // Mark craft process as finished
         craftProcess.is_finished = true;
-        craftProcess.status_id = craftProcessStatusIds[force ? "Finished" : "Finished (Forced)"];
         await building.save();
 
         return true;
+    } catch (e) {
+        if (throwException) throw e;
+        return false;
+    }
+}
+
+const reworkCraft = async (character, building, craftProcess, force = false, throwException = true) => {
+    try {
+        if (!force) {
+            // Character must have access to the building
+            checkAccessToBuilding(character, building)
+        }
+
+        if (craftProcess.finish_at > Date.now()) {
+            throw new Error("Crafted item cannot be reworked until craft time has passed")
+        }
+
+        if (craftProcess.is_finished || craftProcess.is_cancelled || craftProcess.is_failed) {
+            throw new Error("Craft process is finished / cancelled / failed")
+        }
+
+        // Quality level must be a real number (i.e 1.5 or 3.7, but not 4.0)
+        if (!Number.isInteger(craftProcess.quality_level)) {
+            throw new Error("Quality level isn't a real number")
+        }
+
+        // Condition: if d100 roll > fractional part of quality level
+        // todo: make dice helper
+        if ((Math.floor(Math.random() * 100) + 1) > (craftProcess.quality_level % 1 * 100)) {
+            // Rework failed
+            craftProcess.is_failed = true;
+        } else {
+            // Rework succeeded
+            craftProcess.quality_level = Math.ceil(craftProcess.quality_level);
+        }
+
+        await building.save();
+        return Number(craftProcess.is_failed)
     } catch (e) {
         if (throwException) throw e;
         return false;
@@ -389,3 +423,4 @@ module.exports.startByBlueprint = startCraftByBlueprint;
 module.exports.startByRecipe    = startCraftByRecipe;
 module.exports.cancel           = cancelCraft;
 module.exports.finish           = finishCraft;
+module.exports.rework           = reworkCraft;
