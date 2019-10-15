@@ -2,6 +2,7 @@
 const {model} = require("mongoose");
 // Helpers
 const { getRecordsMap } = require("../app/helpers/ModelsHelper");
+const { capitalizeFirstLetter } = require("../app/helpers/StringHelper")
 
 const blueprints = [
     {
@@ -2625,10 +2626,6 @@ const blueprints = [
         tech_tier: 2
     }
 ]
-
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 /**
  * Make any changes you need to make to the database here

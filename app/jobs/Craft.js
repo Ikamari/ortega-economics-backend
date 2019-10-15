@@ -1,11 +1,10 @@
 // Database
-const { model } = require("mongoose");
+const { model, Types } = require("mongoose");
 // Helpers
 const { invertResources } = require("../helpers/ResourcesHelper");
 const { hasObjectId } = require("../helpers/ObjectIdHelper");
 // Moment
 const moment = require("moment");
-
 
 // Quality levels
 const
@@ -75,7 +74,7 @@ class CraftProcessCreator {
                 }
             });
 
-            if (!hasFacility) return;
+            if (hasFacility) return;
             throw new Error("Building doesn't have free facility of required type");
         }
 
@@ -88,6 +87,7 @@ class CraftProcessCreator {
 
         const hasFacility = requiredFacilities.some((requiredFacility) => {
             const hasFacility = freeFacilities.some((freeFacility) => {
+                if (!freeFacility.properties) throw new Error("building.facilities.properties must be populated");
                 if (
                     requiredFacility.type_id.equals(freeFacility.properties.type_id) &&
                     requiredFacility.tech_tier <= freeFacility.properties.tech_tier
@@ -109,13 +109,16 @@ class CraftProcessCreator {
     // Check whether defined participants has required perks and validate them
     async checkRequiredPerks() {
         // todo: add support of non-fraction members
+        if (this.participants.length < 1) {
+            throw new Error("At least one participant must be present in craft process");
+        }
         if (this.building.fraction_id !== null) {
             // All participants must be fraction members + must be free (don't participate in other crafts)
             const fraction    = await this.building.fraction;
             const freeMembers = await fraction.free_members;
             this.participants.map((participantId) => {
                 const isFree = freeMembers.filter(freeMember => {
-                    return freeMember._id.toString() === participantId
+                    return freeMember._id.equals(participantId)
                 }).length !== 0
                 if (!isFree) {
                     throw new Error("One of defined participants is busy")
@@ -123,7 +126,7 @@ class CraftProcessCreator {
             })
         } else {
             // Only building owner can participate in craft
-            if (this.participants.length > 1 || (this.participants[0] !== undefined && this.participants[0] !== this.character._id)) {
+            if (this.participants[0] !== this.character._id) {
                 throw new Error("Only owner of the building can participate in craft")
             }
         }
@@ -172,7 +175,11 @@ class CraftProcessCreator {
 
     // Check whether building has enough of resources
     checkRequiredResources() {
-        this.requiredResources = (this.craftingBy === "Blueprint" ? this.blueprint : this.recipe).required_resources.slice();
+        // Clone of required resources from recipe/blueprint record
+        // array.slice() won't work in this case, because subdocuments in required_resources are objects
+        this.requiredResources = (this.craftingBy === "Blueprint" ? this.blueprint : this.recipe).required_resources.map((requiredResource) => {
+            return { _id: requiredResource._id, amount: requiredResource.amount }
+        });
         const multiplier = this.craftingBy === "Blueprint" ? this.resourcesMultiplier : this.quantity;
 
         // Use multiplier on resources
@@ -187,9 +194,11 @@ class CraftProcessCreator {
     createCraftProcess() {
         const qualityLevel = this.resourcesLevel + this.facilitiesLevel + this.perksLevel + this.blueprintLevel;
         // Craft cannot be started if quality level is too low
-        if (qualityLevel < BASIC_LEVEL) throw new Error("Overall quality is too low");
+        if (this.craftingBy === "Blueprint" && qualityLevel < BASIC_LEVEL) throw new Error("Overall quality is too low");
 
+        const id = Types.ObjectId();
         this.building.craft_processes.push({
+            _id:                  id,
             crafting_id:          this.craftingBy === "Blueprint" ? this.blueprint._id : this.recipe._id,
             blueprint_entity_id:  this.craftingBy === "Blueprint" ? this.blueprintEntity._id : null,
             crafting_by:          this.craftingBy,
@@ -204,6 +213,8 @@ class CraftProcessCreator {
             crafting_facilities:  this.facilitiesToUse,
             finish_at: moment().add(this.craftingTime, "minutes").toDate()
         });
+
+        return id;
     }
 
     async craftByBlueprint(blueprintEntity, participants = [], resourcesMultiplier = 1, throwException = true) {
@@ -225,12 +236,12 @@ class CraftProcessCreator {
             this.defineCraftingTime();
 
             // Create new craft process in building
-            this.createCraftProcess();
+            const craftProcessId = this.createCraftProcess();
 
             // Take the specified amount of resources from building's storage
-            await this.building.editResources(invertResources(this.requiredResources));
+            await this.building.editResources(invertResources(this.requiredResources.slice()));
 
-            return true;
+            return craftProcessId;
         }
         catch (error) {
             if (throwException) throw error;
@@ -251,12 +262,12 @@ class CraftProcessCreator {
             this.defineCraftingTime();
 
             // Create new craft process in building
-            this.createCraftProcess();
+            const craftProcessId = this.createCraftProcess();
 
             // Take the specified amount of resources from building's storage
-            await this.building.editResources(invertResources(this.requiredResources));
+            await this.building.editResources(invertResources(this.requiredResources.slice()));
 
-            return true;
+            return craftProcessId;
         }
         catch (error) {
             if (throwException) throw error;
@@ -313,13 +324,14 @@ const cancelCraft = async (character, building, craftProcess, force = false, thr
             }
         }
 
-        if (craftProcess.is_finished || craftProcess.is_cancelled || craftProcess.is_failed) {
+        if (craftProcess.is_finished) {
             throw new Error("Craft process is finished / cancelled / failed")
         }
 
         // Return resources to the building
         await building.editResources(craftProcess.used_resources)
 
+        craftProcess.is_finished  = true;
         craftProcess.is_cancelled = true;
         await building.save();
 
@@ -341,7 +353,7 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
             }
         }
 
-        if (craftProcess.is_finished || craftProcess.is_cancelled || craftProcess.is_failed) {
+        if (craftProcess.is_finished) {
             throw new Error("Craft process is finished / cancelled / failed")
         }
 
@@ -392,7 +404,7 @@ const reworkCraft = async (character, building, craftProcess, force = false, thr
             throw new Error("Crafted item cannot be reworked until craft time has passed")
         }
 
-        if (craftProcess.is_finished || craftProcess.is_cancelled || craftProcess.is_failed) {
+        if (craftProcess.is_finished) {
             throw new Error("Craft process is finished / cancelled / failed")
         }
 
@@ -405,7 +417,8 @@ const reworkCraft = async (character, building, craftProcess, force = false, thr
         // todo: make dice helper
         if ((Math.floor(Math.random() * 100) + 1) > (craftProcess.quality_level % 1 * 100)) {
             // Rework failed
-            craftProcess.is_failed = true;
+            craftProcess.is_failed   = true;
+            craftProcess.is_finished = true;
         } else {
             // Rework succeeded
             craftProcess.quality_level = Math.ceil(craftProcess.quality_level);

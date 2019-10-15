@@ -1,5 +1,5 @@
 // Database
-const { Schema, model } = require("mongoose");
+const { Schema, Types, model } = require("mongoose");
 const Int32 = require("mongoose-int32");
 // Helpers
 const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
@@ -168,7 +168,7 @@ BuildingSchema.methods.freeFacilities = function(filter, sortBy, sortDirection =
 BuildingSchema.methods.hasResources = function(resourcesToFind, throwException = true) {
     try {
         resourcesToFind.map((resourceToFind) => {
-            if (Math.abs(resourceToFind.amount) > this.resources[resourceToFind._id]) {
+            if (Math.abs(resourceToFind.amount) > this.resources.get(resourceToFind._id.toString())) {
                 throw new Error("Building doesn't have enough of resources");
             }
         })
@@ -179,6 +179,7 @@ BuildingSchema.methods.hasResources = function(resourcesToFind, throwException =
     return true
 }
 
+// todo: add and use autosave parameter
 BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
     resources = sortResources(mergeResources(resources));
     let newUsedStorage = this.used_storage;
@@ -234,9 +235,53 @@ BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
     return this.save();
 };
 
+// todo: add and use autosave parameter
 BuildingSchema.methods.editResource = function(resource, strictCheck = true) {
     return this.editResources(resource, strictCheck)
 };
+
+BuildingSchema.methods.addFacility = function(facilityId, isActive = false, autoSave = true) {
+    const newFacilityEntity = {
+        _id: Types.ObjectId(),
+        facility_id: facilityId,
+        is_active: isActive
+    };
+
+    if (isActive) {
+        // todo: Automatically disable facility if there's not enough of energy for it
+    }
+
+    this.facilities.push(newFacilityEntity);
+    return autoSave ? this.save() : newFacilityEntity._id;
+}
+
+BuildingSchema.methods.changeFacilityState = function(facilityEntityId, isActive, autoSave = true) {
+    const facilityEntity = this.facilities.id(facilityEntityId);
+    if (!facilityEntity) {
+        throw new Error("Unable to find specified facility");
+    }
+
+    if (facilityEntity.is_active === isActive) return true;
+
+    // todo: check whether facility is currently in use
+
+    // todo: do not let to enable facility if there's not enough of energy for it
+    facilityEntity.is_active = isActive;
+
+    return autoSave ? this.save() : true;
+}
+
+BuildingSchema.methods.removeFacility = function(facilityEntityId, autoSave = true) {
+    const facilityEntity = this.facilities.id(facilityEntityId);
+    if (!facilityEntity) {
+        throw new Error("Unable to find specified facility");
+    }
+
+    // todo: check whether facility is currently in use
+
+    facilityEntity.remove();
+    return autoSave ? this.save() : true;
+}
 
 BuildingSchema.methods.addProduction = function (turnover, autoSave = true) {
     this.produces.push({

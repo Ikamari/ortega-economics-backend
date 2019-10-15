@@ -32,6 +32,15 @@ const connectToDB = () => {
 
 const onDBConnectionSuccess = () => {
     console.log(`Successfully connected to DB\nRunning migrations...`);
+
+    // Run tests if server was started with corresponding argument
+    if (process.argv[2] === "test") {
+        require("./app/tests")(process.argv[3].toLocaleLowerCase() || "all").then(() => {
+            process.exit();
+        });
+        return;
+    }
+
     migrator.run("up")
         .then(() => {
             global.isReady = true;

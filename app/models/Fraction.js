@@ -166,8 +166,7 @@ FractionSchema.methods.editResource = async function(resource, strictCheck = tru
 
 FractionSchema.virtual("free_members").get(async function() {
     const
-        freeMembers = [],
-        busyMembers = [],
+        busyMembers = {},
         buildings   = await this.buildings,
         members     = await this.members;
 
@@ -176,17 +175,15 @@ FractionSchema.virtual("free_members").get(async function() {
         building.craft_processes.map((craftProcess) => {
             if (craftProcess.is_finished) return;
             craftProcess.crafting_characters.map((craftingCharacterId) => {
-                busyMembers.push(craftingCharacterId.toString())
+                busyMembers[craftingCharacterId.toString()] = true;
             })
         })
     })
 
     // Get free members
-    members.map((member) => {
-        if (!busyMembers.includes(member._id.toString())) freeMembers.push(member)
-    })
-
-    return freeMembers
+    return members.map((member) => {
+        if (!(member._id.toString() in busyMembers)) return member
+    }).filter(member => member !== undefined)
 })
 
 // Get resources from all fraction's buildings
