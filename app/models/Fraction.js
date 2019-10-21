@@ -68,6 +68,14 @@ FractionSchema.methods.hasResources = async function(resourcesToFind, throwExcep
     return true
 }
 
+FractionSchema.methods.hasEnergy = async function(amountOfEnergy, throwException = true) {
+    const result = (await this.energy).free >= amountOfEnergy;
+    if (throwException && !result) {
+        throw new Error("Fraction doesn't have enough of energy")
+    }
+    return result;
+}
+
 FractionSchema.methods.editResources = async function(resources, strictCheck = true) {
     // todo: Try to use transactions (replica sets are required)
     const storageInfo = await this.storage;
@@ -164,6 +172,13 @@ FractionSchema.methods.editResource = async function(resource, strictCheck = tru
     this.editResources([resource], strictCheck);
 }
 
+// Disable all facilities of fraction
+FractionSchema.methods.blackout = async function() {
+    (await this.buildings).map(async (building) => {
+        await building.disable(true);
+    });
+}
+
 FractionSchema.virtual("free_members").get(async function() {
     const
         busyMembers = {},
@@ -184,6 +199,25 @@ FractionSchema.virtual("free_members").get(async function() {
     return members.map((member) => {
         if (!(member._id.toString() in busyMembers)) return member
     }).filter(member => member !== undefined)
+})
+
+// Get overall info about free/available energy in fraction
+FractionSchema.virtual("energy").get(async function() {
+    const buildings = await this.buildings.populate("facilities.properties").exec();
+    const energyInfo = {
+        consumption: 0,
+        production: 0
+    };
+
+    buildings.map(async (building) => {
+        if (building.is_active) {
+            energyInfo.production += building.energy_production;
+            energyInfo.consumption += await building.energy_consumption;
+        }
+    });
+
+    energyInfo.free = energyInfo.production - energyInfo.consumption;
+    return energyInfo;
 })
 
 // Get resources from all fraction's buildings
@@ -221,13 +255,13 @@ FractionSchema.virtual("storage").get(async function() {
 });
 
 // Get all fraction members
-FractionSchema.virtual("members").get(async function() {
-    return await model("Character").find({ fraction_id: this._id });
+FractionSchema.virtual("members").get(function() {
+    return model("Character").find({ fraction_id: this._id });
 });
 
 // Get all fraction buildings
-FractionSchema.virtual("buildings").get(async function() {
-    return await model("Building").find({ fraction_id: this._id });
+FractionSchema.virtual("buildings").get(function() {
+    return model("Building").find({ fraction_id: this._id });
 });
 
 const FractionModel = model("Fraction", FractionSchema);

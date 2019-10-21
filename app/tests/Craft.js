@@ -5,7 +5,7 @@ const Craft = require("../jobs/Craft");
 // Helpers
 const { getRecordsMap } = require("../helpers/ModelsHelper");
 
-const autotest = async () => {
+module.exports = async () => {
 
     const resourcesMap = await getRecordsMap("Resource");
     const facilitiesMap = await getRecordsMap("Facility");
@@ -135,5 +135,3 @@ const autotest = async () => {
     await secondCharacter.delete();
     await building.delete();
 }
-
-module.exports = autotest;

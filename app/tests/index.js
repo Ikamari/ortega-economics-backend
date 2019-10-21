@@ -1,5 +1,6 @@
 const tests = [];
 tests["craft"] = require("./Craft");
+tests["buildings"] = require("./Buildings");
 
 const autotester = async (testName) => {
     console.info(`Trying to run "${testName}" autotests`);

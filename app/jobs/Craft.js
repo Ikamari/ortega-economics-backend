@@ -342,6 +342,7 @@ const cancelCraft = async (character, building, craftProcess, force = false, thr
     }
 }
 
+// todo: craft processes should be stopped if building is getting disabled
 const finishCraft = async (character, building, craftProcess, force = false, throwException = true) => {
     try {
         if (!force) {
