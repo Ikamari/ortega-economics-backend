@@ -68,12 +68,24 @@ FractionSchema.methods.hasResources = async function(resourcesToFind, throwExcep
     return true
 }
 
-FractionSchema.methods.hasEnergy = async function(amountOfEnergy, throwException = true) {
-    const result = (await this.energy).free >= amountOfEnergy;
-    if (throwException && !result) {
-        throw new Error("Fraction doesn't have enough of energy")
-    }
-    return result;
+FractionSchema.methods.hasEnergy = function(amountOfEnergy, doBlackoutOnFalse = false, rejectOnFalse = true) {
+    return new Promise((resolve, reject) => {
+        if (amountOfEnergy <= 0) {
+            resolve(true);
+            return;
+        }
+        this.energy.then((energyInfo) => {
+            const result = energyInfo.free >= amountOfEnergy;
+            if (!result && doBlackoutOnFalse) {
+                this.blackout().then(() => resolve(false))
+            }
+            else if (result || !rejectOnFalse) {
+                resolve(result)
+            } else {
+                reject("Fraction doesn't have enough of energy")
+            }
+        })
+    })
 }
 
 FractionSchema.methods.editResources = async function(resources, strictCheck = true) {
@@ -163,7 +175,7 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
 
     // Commit changes
     // todo: log changes
-    buildings.map(async (building) => {
+    await buildings.map(async (building) => {
         await building.save();
     })
 };
@@ -173,10 +185,14 @@ FractionSchema.methods.editResource = async function(resource, strictCheck = tru
 }
 
 // Disable all facilities of fraction
-FractionSchema.methods.blackout = async function() {
-    (await this.buildings).map(async (building) => {
-        await building.disable(true);
-    });
+FractionSchema.methods.blackout = function() {
+    return new Promise((resolve) => {
+        this.buildings.then((buildings) => {
+            Promise.all(buildings.map((building) => {
+                return building.disable(true);
+            })).then(() => resolve(true))
+        })
+    })
 }
 
 FractionSchema.virtual("free_members").get(async function() {
@@ -201,23 +217,32 @@ FractionSchema.virtual("free_members").get(async function() {
     }).filter(member => member !== undefined)
 })
 
-// Get overall info about free/available energy in fraction
-FractionSchema.virtual("energy").get(async function() {
-    const buildings = await this.buildings.populate("facilities.properties").exec();
-    const energyInfo = {
-        consumption: 0,
-        production: 0
-    };
+// Get overall info about free/consumed/produced energy in fraction
+FractionSchema.virtual("energy").get(function() {
+    return new Promise((resolve, reject) => {
+        this.buildings.then((buildings) => {
+            let energyProduction = 0, energyConsumption = 0;
 
-    buildings.map(async (building) => {
-        if (building.is_active) {
-            energyInfo.production += building.energy_production;
-            energyInfo.consumption += await building.energy_consumption;
-        }
-    });
+            // Calculate energy production and collect promises that will return energy consumption info
+            const consumptionInfoPromises = buildings.map(async (building) => {
+                if (building.is_active) {
+                    return building.energy.then((buildingEnergyInfo) => {
+                        energyProduction  += buildingEnergyInfo.production;
+                        energyConsumption += buildingEnergyInfo.consumption;
+                    });
+                }
+            });
 
-    energyInfo.free = energyInfo.production - energyInfo.consumption;
-    return energyInfo;
+            // Return overall info about energy
+            Promise.all(consumptionInfoPromises).then(() => {
+                resolve({
+                    consumption: energyConsumption,
+                    production: energyProduction,
+                    free: energyProduction - energyConsumption
+                });
+            })
+        })
+    })
 })
 
 // Get resources from all fraction's buildings

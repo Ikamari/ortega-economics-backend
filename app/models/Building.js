@@ -147,38 +147,117 @@ BuildingSchema.virtual("energy_consumption").get(async function () {
     return energyConsumption;
 })
 
-BuildingSchema.methods.enable = async function(autoSave = true, throwException = true) {
-    // Check whether fraction/building has enough of energy
-    if (this.fraction_id) {
-        // Check whether fraction has enough of energy
-        const fraction = await this.fraction;
-        if (await this.energy_consumption > (this.energy_production + (await fraction.energy).free)) {
-            if (throwException) throw new Error("Fraction doesn't have enough of energy")
-            return false;
-        }
-    } else {
-        // Check whether building has enough of energy
-        if (await this.energy_consumption > this.energy_production) {
-            if (throwException) throw new Error("Building doesn't have enough of energy")
-            return false;
-        }
-    }
+// Get overall info about free/consumed/produced energy in building
+BuildingSchema.virtual("energy").get(function() {
+    return new Promise((resolve, reject) => {
+        this.populateFacilities().then(() => {
+            let energyConsumption = 0;
+            this.facilities.map((facility) => {
+                if (facility.is_active) {
+                    energyConsumption += facility.properties.energy_consumption;
+                }
+            });
+            resolve({
+                consumption: energyConsumption,
+                production: this.energy_production,
+                free: this.energy_production - energyConsumption
+            });
+        })
+    })
+})
 
-    this.is_active = true;
-    return autoSave ? this.save() : true;
+BuildingSchema.methods.populateFacilities = function() {
+    return new Promise((resolve) => {
+        if (!this.populated("facilities.properties")) {
+            this.populate("facilities.properties").execPopulate().then(() => resolve(true));
+        } else {
+            resolve(true)
+        }
+    })
 }
 
-// todo: Pause all craft processes
-BuildingSchema.methods.disable = async function(isBlackout = false, autoSave = true) {
-    if (this.fraction_id && !isBlackout) {
-        const fraction = await this.fraction;
-        if ((((await fraction.energy).free + await this.energy_consumption) - this.energy_production) < 0) {
-            await fraction.blackout()
+BuildingSchema.methods.hasEnergy = function(amountOfEnergy, doBlackoutOnFalse = false, rejectOnFalse = true) {
+    return new Promise((resolve, reject) => {
+        if (amountOfEnergy <= 0) {
+            resolve(true)
         }
-    }
+        else if (this.fraction_id) {
+            // Check whether fraction has enough of energy
+            this.fraction.then((fraction) =>
+                fraction.hasEnergy(amountOfEnergy, doBlackoutOnFalse, rejectOnFalse)
+                    .then((result) => resolve(result))
+                    .catch((error) => reject(error))
+            )
+        } else {
+            // Check whether building has enough of energy
+            this.energy.then((buildingEnergyInfo) => {
+                const result = buildingEnergyInfo.free >= amountOfEnergy;
+                if (result || !rejectOnFalse || doBlackoutOnFalse) {
+                    resolve(result)
+                } else {
+                    reject("Building doesn't have enough of energy")
+                }
+            })
+        }
+    })
+}
 
-    this.is_active = false;
-    return autoSave ? this.save() : true;
+BuildingSchema.methods.enable = function() {
+    return new Promise((resolve, reject) => {
+        if (this.is_active === true) resolve(true);
+
+        // Check whether fraction/building has enough of energy
+        if (this.fraction_id) {
+            this.energy.then((buildingEnergyInfo) => {
+                this.fraction.then((fraction) =>
+                    fraction.hasEnergy(buildingEnergyInfo.consumption - buildingEnergyInfo.production)
+                        .then(() => {
+                            this.is_active = true;
+                            this.save().then(() => resolve(true));
+                        })
+                        .catch((error) => reject(error))
+                )
+            })
+        } else {
+            // Get energy consumption of this building
+            this.energy.then((buildingEnergyInfo) => {
+                if (buildingEnergyInfo.free < 0) {
+                    reject("Building doesn't have enough of energy")
+                } else {
+                    this.is_active = true;
+                    this.save().then(() => resolve(true));
+                }
+            })
+        }
+    })
+}
+
+BuildingSchema.methods.disable = function(isBlackout = false) {
+    return new Promise((resolve, reject) => {
+        if (this.is_active === false) resolve(true);
+
+        if (this.fraction_id && !isBlackout) {
+            this.energy.then((buildingEnergyInfo) => {
+                this.fraction.then((fraction) =>
+                    fraction.hasEnergy(buildingEnergyInfo.consumption - buildingEnergyInfo.production, true)
+                        .then((result) => {
+                            if (!result) {
+                                resolve(true);
+                                return
+                            }
+                            // todo: Pause all craft processes
+                            this.is_active = false;
+                            this.save().then(() => resolve(true));
+                        })
+                )
+            });
+            return;
+        }
+
+        // todo: Pause all craft processes
+        this.is_active = false;
+        this.save().then(() => resolve(true))
+    })
 }
 
 BuildingSchema.methods.freeFacilities = function(filter, sortBy, sortDirection = "ASC") {
@@ -295,94 +374,80 @@ BuildingSchema.methods.editResource = function(resource, strictCheck = true) {
     return this.editResources(resource, strictCheck)
 };
 
-BuildingSchema.methods.addFacility = async function(facilityId, isActive = true, autoSave = true) {
-    const facility = await model("Facility").findById(facilityId);
-    if (!facility) throw new Error("Unable to find specified facility entity");
+BuildingSchema.methods.addFacility = function(facilityId, isActive = true) {
+    return new Promise((resolve, reject) => {
+        model("Facility").findById(facilityId).then((facility) => {
+            if (!facility) reject("Unable to find specified facility entity");
 
-    const newFacilityEntity = {
-        _id: Types.ObjectId(),
-        facility_id: facilityId,
-        is_active: isActive
-    };
+            const newFacilityEntity = {
+                _id: Types.ObjectId(),
+                facility_id: facilityId,
+                is_active: false
+            };
 
-    if (isActive) {
-        // Check whether fraction/building has enough of energy
-        if (this.fraction_id) {
-            // Check whether fraction has enough of energy
-            const fraction = await this.fraction;
-            newFacilityEntity.is_active = (await fraction.energy).free >= facility.energy_consumption
+            if (isActive) {
+                // Check whether fraction/building has enough of energy
+                this.hasEnergy(facility.energy_consumption, false, false).then((hasEnergy) => {
+                    newFacilityEntity.is_active = hasEnergy;
+                    this.facilities.push(newFacilityEntity);
+                    this.save().then(() => resolve(newFacilityEntity._id));
+                });
+            } else {
+                this.facilities.push(newFacilityEntity);
+                this.save().then(() => resolve(newFacilityEntity._id));
+            }
+        })
+    })
+}
+
+BuildingSchema.methods.enableFacility = async function(facilityEntityId) {
+    return new Promise((resolve, reject) => {
+        const facilityEntity = this.facilities.id(facilityEntityId);
+        if (!facilityEntity) reject("Unable to find specified facility entity");
+        if (facilityEntity.is_active === true) resolve(true);
+
+        this.populateFacilities().then(() => {
+            this.hasEnergy(facilityEntity.properties.energy_consumption).then(() => {
+                facilityEntity.is_active = true;
+                this.save().then(() => resolve(true));
+            })
+        })
+    });
+}
+
+BuildingSchema.methods.disableFacility = function(facilityEntityId) {
+    return new Promise((resolve, reject) => {
+        const facilityEntity = this.facilities.id(facilityEntityId);
+        if (!facilityEntity) reject("Unable to find specified facility entity");
+        if (facilityEntity.is_active === false) resolve(true);
+
+        const isFree = this.freeFacilities.some((freeFacility) => {
+            return freeFacility._id.equals(facilityEntityId)
+        })
+        if (!isFree) {
+            reject("Facility cannot be disabled. It's currently used in craft process")
         } else {
-            // Check whether building has enough of energy
-            newFacilityEntity.is_active = this.energy_production >= (await this.energy_consumption + facility.energy_consumption)
+            facilityEntity.is_active = false;
+            this.save().then(() => resolve(true));
         }
-    }
-
-    this.facilities.push(newFacilityEntity);
-    return autoSave ? this.save() : newFacilityEntity._id;
+    });
 }
 
-BuildingSchema.methods.enableFacility = async function(facilityEntityId, autoSave = true, throwException = true) {
-    const facilityEntity = this.facilities.id(facilityEntityId);
-    if (!facilityEntity) throw new Error("Unable to find specified facility entity");
-    if (facilityEntity.is_active === true) return true;
+BuildingSchema.methods.removeFacility = function(facilityEntityId) {
+    return new Promise((resolve, reject) => {
+        const facilityEntity = this.facilities.id(facilityEntityId);
+        if (!facilityEntity) reject("Unable to find specified facility entity");
 
-    if (!this.populated("facilities.properties")) {
-        await this.populate("facilities.properties").execPopulate();
-    }
-
-    // Check whether fraction/building has enough of energy
-    if (this.fraction_id) {
-        // Check whether fraction has enough of energy
-        const fraction = await this.fraction;
-        if ((await fraction.energy).free < facilityEntity.properties.energy_consumption) {
-            if (throwException) throw new Error("Fraction doesn't have enough of energy")
-            return false;
+        const isFree = this.freeFacilities.some((freeFacility) => {
+            return freeFacility._id.equals(facilityEntityId)
+        })
+        if (!isFree) {
+            reject("Facility cannot be removed. It's currently used in craft process")
+        } else {
+            facilityEntity.remove();
+            this.save().then(() => resolve(true));
         }
-    } else {
-        // Check whether building has enough of energy
-        if (this.energy_production < (await this.energy_consumption + facilityEntity.properties.energy_consumption)) {
-            if (throwException) throw new Error("Building doesn't have enough of energy")
-            return false;
-        }
-    }
-
-    facilityEntity.is_active = true;
-    return autoSave ? this.save() : true;
-}
-
-BuildingSchema.methods.disableFacility = function(facilityEntityId, autoSave = true, throwException = true) {
-    const facilityEntity = this.facilities.id(facilityEntityId);
-    if (!facilityEntity) throw new Error("Unable to find specified facility entity");
-    if (facilityEntity.is_active === false) return true;
-
-    const isFree = this.freeFacilities.some((freeFacility) => {
-        return freeFacility._id.equals(facilityEntityId)
-    })
-    if (!isFree) {
-        if (throwException) throw new Error("Facility cannot be disabled. It's currently used in craft process")
-        return false;
-    }
-
-    facilityEntity.is_active = false;
-    return autoSave ? this.save() : true;
-}
-
-BuildingSchema.methods.removeFacility = function(facilityEntityId, autoSave = true, throwException = true) {
-    const facilityEntity = this.facilities.id(facilityEntityId);
-    if (!facilityEntity) {
-        throw new Error("Unable to find specified facility entity");
-    }
-
-    const isFree = this.freeFacilities.some((freeFacility) => {
-        return freeFacility._id.equals(facilityEntityId)
-    })
-    if (!isFree) {
-        if (throwException) throw new Error("Facility cannot be removed. It's currently used in craft process")
-        return false;
-    }
-
-    facilityEntity.remove();
-    return autoSave ? this.save() : true;
+    });
 }
 
 BuildingSchema.methods.addProduction = function (turnover, autoSave = true) {
