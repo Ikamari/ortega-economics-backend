@@ -1,18 +1,32 @@
-const tests = [];
-tests["craft"] = require("./Craft");
-tests["buildings"] = require("./Buildings");
+const autotests = {
+    "sandbox": require("./Sandbox"),
+    "craft": require("./Craft"),
+    "buildings": require("./Buildings")
+};
 
-const autotester = async (testName) => {
-    console.info(`Trying to run "${testName}" autotests`);
-    if (testName === "all") {
-        await tests.map(async (test) => await test());
-    }
-    else if (tests[testName]) {
-        await tests[testName]();
-    }
-    else {
-        console.error(`There's no autotests with name "${testName}"`);
-    }
-}
+const runAutotest = (testName) => {
+    console.info(`Starting "${testName}" autotest`);
+    return autotests[testName]()
+        .then(() => {
+            console.log(`Autotest "${testName}" successfully finished`)
+        })
+        .catch((error) => {
+            console.error(`Autotest "${testName}" failed:`, error);
+        })
+};
 
-module.exports = autotester;
+module.exports = (testName) => {
+    return new Promise((resolve) => {
+        if (testName === "all") {
+            Promise.all(
+                Object.keys(autotests).map((testName) => runAutotest(testName))
+            ).then(() => resolve(true))
+        }
+        else if (testName in autotests) {
+            runAutotest(testName).then(() => resolve(true))
+        }
+        else {
+            console.warn(`There's no autotests with name "${testName}"`)
+        }
+    })
+};

@@ -4,11 +4,13 @@ const Int32 = require("mongoose-int32");
 // Helpers
 const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
 const { hasObjectId } = require("../helpers/ObjectIdHelper");
+// Jobs
+const { stop: stopCraft } = require("../jobs/Craft");
 // Validators
 const { exists } = require("../validators/General");
 // Schemas
-const FacilityEntitySchema = require("./schemas/FacilityEntity")
-const CraftProcessSchema = require("./schemas/CraftProcess")
+const FacilityEntitySchema = require("./schemas/FacilityEntity");
+const CraftProcessSchema = require("./schemas/CraftProcess");
 
 const ResourceTurnoverSchema = new Schema({
     resource_id: {
@@ -142,10 +144,10 @@ BuildingSchema.virtual("energy_consumption").get(async function () {
         if (facility.is_active) {
             energyConsumption += facility.properties.energy_consumption;
         }
-    })
+    });
 
     return energyConsumption;
-})
+});
 
 // Get overall info about free/consumed/produced energy in building
 BuildingSchema.virtual("energy").get(function() {
@@ -232,33 +234,26 @@ BuildingSchema.methods.enable = function() {
     })
 }
 
-BuildingSchema.methods.disable = function(isBlackout = false) {
-    return new Promise((resolve, reject) => {
-        if (this.is_active === false) resolve(true);
+BuildingSchema.methods.disable = async function(isBlackout = false) {
+    if (this.is_active === false) return true;
 
-        if (this.fraction_id && !isBlackout) {
-            this.energy.then((buildingEnergyInfo) => {
-                this.fraction.then((fraction) =>
-                    fraction.hasEnergy(buildingEnergyInfo.consumption - buildingEnergyInfo.production, true)
-                        .then((result) => {
-                            if (!result) {
-                                resolve(true);
-                                return
-                            }
-                            // todo: Pause all craft processes
-                            this.is_active = false;
-                            this.save().then(() => resolve(true));
-                        })
-                )
-            });
-            return;
-        }
+    if (this.fraction_id && !isBlackout) {
+        const buildingEnergyInfo = await this.energy;
+        const fraction           = await this.fraction;
+        const fractionHasEnergy  = await fraction.hasEnergy(buildingEnergyInfo.consumption - buildingEnergyInfo.production, true);
 
-        // todo: Pause all craft processes
-        this.is_active = false;
-        this.save().then(() => resolve(true))
-    })
-}
+        if (!fractionHasEnergy) return true;
+    }
+
+    // Stop all craft processes
+    await Promise.all(this.craft_processes.map((craftProcess) => {
+        return stopCraft(null, this, craftProcess, true, false, false);
+    }));
+
+    this.is_active = false;
+    await this.save();
+    return true;
+};
 
 BuildingSchema.methods.freeFacilities = function(filter, sortBy, sortDirection = "ASC") {
     if (this.populate() === undefined && (sortBy || filter)) {

@@ -101,7 +101,7 @@ class CraftProcessCreator {
                 }
             });
             if (hasFacility) return true;
-        })
+        });
 
         if (!hasFacility) throw new Error("Building doesn't have free facility of required type");
     }
@@ -119,7 +119,7 @@ class CraftProcessCreator {
             this.participants.map((participantId) => {
                 const isFree = freeMembers.filter(freeMember => {
                     return freeMember._id.equals(participantId)
-                }).length !== 0
+                }).length !== 0;
                 if (!isFree) {
                     throw new Error("One of defined participants is busy")
                 }
@@ -144,7 +144,7 @@ class CraftProcessCreator {
                     if (availablePerks.length === this.blueprint.required_perks.length) return true;
                 }
             })
-        })
+        });
 
         const percentageOfAvailable = availablePerks.length / this.blueprint.required_perks.length;
         if (percentageOfAvailable >= 0.75) this.perksLevel = COMPLEX_LEVEL;
@@ -282,12 +282,12 @@ const increaseQualityLevel = (qualityLevel, times = 1) => {
     let increasedTimes = 0, increasedQualityLevel = qualityLevel;
     while (increasedTimes < times) {
         if (increasedQualityLevel < BASIC_LEVEL) increasedQualityLevel = BASIC_LEVEL;
-        else if (BASIC_LEVEL <= increasedQualityLevel < SOLID_LEVEL) increasedQualityLevel = SOLID_LEVEL
+        else if (BASIC_LEVEL <= increasedQualityLevel < SOLID_LEVEL) increasedQualityLevel = SOLID_LEVEL;
         else if (SOLID_LEVEL <= increasedQualityLevel < COMPLEX_LEVEL) increasedQualityLevel = COMPLEX_LEVEL;
         else return increasedQualityLevel
     }
     return increasedQualityLevel;
-}
+};
 
 // Check whether character has permission to start the craft process in specific building
 const checkAccessToBuilding = (character, building) => {
@@ -295,7 +295,7 @@ const checkAccessToBuilding = (character, building) => {
         return true;
     }
     throw new Error("Character doesn't have access to building")
-}
+};
 
 // Check whether character has permission to the craft process
 const checkAccessToCraftProcess = (character, craftProcess) => {
@@ -303,21 +303,21 @@ const checkAccessToCraftProcess = (character, craftProcess) => {
         return true;
     }
     throw new Error("Character doesn't have access to the craft process")
-}
+};
 
 const startCraftByBlueprint = (character, building, blueprintEntity, participants = [], resourcesMultiplier = 1, throwException = true) => {
     return (new CraftProcessCreator(character, building)).craftByBlueprint(blueprintEntity, participants, resourcesMultiplier, throwException)
-}
+};
 
 const startCraftByRecipe = (character, building, recipe, quantity = 1, throwException = true) => {
     return (new CraftProcessCreator(character, building)).craftByRecipe(recipe, quantity, throwException)
-}
+};
 
 const cancelCraft = async (character, building, craftProcess, force = false, throwException = true) => {
     try {
         if (!force) {
             // Character must have access to the building
-            checkAccessToBuilding(character, building)
+            checkAccessToBuilding(character, building);
 
             if (craftProcess.finish_at <= Date.now()) {
                 throw new Error("Craft process cannot be cancelled when craft time has passed")
@@ -329,10 +329,11 @@ const cancelCraft = async (character, building, craftProcess, force = false, thr
         }
 
         // Return resources to the building
-        await building.editResources(craftProcess.used_resources)
+        await building.editResources(craftProcess.used_resources);
 
         craftProcess.is_finished  = true;
         craftProcess.is_cancelled = true;
+        craftProcess.finished_at = Date.now();
         await building.save();
 
         return true
@@ -340,14 +341,13 @@ const cancelCraft = async (character, building, craftProcess, force = false, thr
         if (throwException) throw e;
         return false;
     }
-}
+};
 
-// todo: craft processes should be stopped if building is getting disabled
 const finishCraft = async (character, building, craftProcess, force = false, throwException = true) => {
     try {
         if (!force) {
             // Character must have access to the building
-            checkAccessToBuilding(character, building)
+            checkAccessToBuilding(character, building);
 
             if (craftProcess.finish_at > Date.now()) {
                 throw new Error("Craft process cannot be finished until craft time has passed")
@@ -365,7 +365,7 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
                 await building.editResources([{
                     _id: recipe.resource_id,
                     amount: craftProcess.quantity * recipe.amount
-                }])
+                }]);
                 break;
             }
             case "Blueprint": {
@@ -385,6 +385,7 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
 
         // Mark craft process as finished
         craftProcess.is_finished = true;
+        craftProcess.finished_at = Date.now();
         await building.save();
 
         return true;
@@ -392,7 +393,7 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
         if (throwException) throw e;
         return false;
     }
-}
+};
 
 const reworkCraft = async (character, building, craftProcess, force = false, throwException = true) => {
     try {
@@ -420,6 +421,7 @@ const reworkCraft = async (character, building, craftProcess, force = false, thr
             // Rework failed
             craftProcess.is_failed   = true;
             craftProcess.is_finished = true;
+            craftProcess.finished_at = Date.now();
         } else {
             // Rework succeeded
             craftProcess.quality_level = Math.ceil(craftProcess.quality_level);
@@ -431,10 +433,64 @@ const reworkCraft = async (character, building, craftProcess, force = false, thr
         if (throwException) throw e;
         return false;
     }
-}
+};
+
+const continueCraft = async (character, building, craftProcess, force = false, throwException = true) => {
+    try {
+        if (!force) {
+            // Character must have access to the building
+            checkAccessToBuilding(character, building);
+        }
+
+        if (!craftProcess.is_stopped || craftProcess.is_finished) {
+            throw new Error("Craft process cannot be continued")
+        }
+
+        // Calculate new time when craft process will be finished
+        const currentFinishAt = moment(craftProcess.finish_at);
+        const stoppedAt       = moment(craftProcess.stopped_at);
+        const timeDifference  = Math.abs(moment.duration(currentFinishAt.diff(stoppedAt)).asSeconds());
+
+        craftProcess.is_stopped = false;
+        craftProcess.stopped_at = null;
+        craftProcess.finish_at  = moment().add(timeDifference, "seconds").toDate();
+        await building.save();
+
+        return true;
+    } catch (e) {
+        if (throwException) throw e;
+        return false;
+    }
+};
+
+const stopCraft = async (character, building, craftProcess, force = false, throwException = true, autosave = true) => {
+    try {
+        if (!force) {
+            // Character must have access to the building
+            checkAccessToBuilding(character, building);
+        }
+
+        if (craftProcess.is_stopped || craftProcess.finish_at < Date.now() || craftProcess.is_finished) {
+            throw new Error("Craft process cannot be stopped")
+        }
+
+        craftProcess.is_stopped = true;
+        craftProcess.stopped_at = Date.now();
+        if (autosave) {
+            await building.save();
+        }
+
+        return true;
+    } catch (e) {
+        if (throwException) throw e;
+        return false;
+    }
+};
 
 module.exports.startByBlueprint = startCraftByBlueprint;
 module.exports.startByRecipe    = startCraftByRecipe;
 module.exports.cancel           = cancelCraft;
 module.exports.finish           = finishCraft;
 module.exports.rework           = reworkCraft;
+module.exports.continueCraft    = continueCraft;
+module.exports.stop             = stopCraft;

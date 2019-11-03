@@ -81,6 +81,9 @@ const CraftProcessSchema = new Schema({
         default: false,
         required: true
     },
+    finished_at: {
+        type: Date
+    },
     is_failed: {
         type: Boolean,
         default: false,
@@ -90,6 +93,14 @@ const CraftProcessSchema = new Schema({
         type: Boolean,
         default: false,
         required: true
+    },
+    is_stopped: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    stopped_at: {
+        type: Date
     }
 });
 
