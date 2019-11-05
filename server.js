@@ -59,7 +59,7 @@ const onDBConnectionError = (error) => {
 };
 
 const app = require("./app");
-app.listen(port, hostname, () => {
+app.listen(port, () => {
     global.isReady = false;
     connectToDB();
 });

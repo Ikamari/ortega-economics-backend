@@ -24,7 +24,7 @@ const configProps = {
  */
 const getConfigProp = (path, useEnvironment = true) => {
     const pathParts = path.split(".");
-    const env       = useEnvironment ? (process.env.NODE_ENV || "prod") : pathParts[0]
+    const env       = useEnvironment ? (process.env.NODE_ENV || "prod") : pathParts[0];
     let property    = configProps[env];
 
     if (!property) {
