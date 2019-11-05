@@ -1,7 +1,7 @@
 // Database
 const { model } = require("mongoose");
 // Jobs
-const Craft = require("../../jobs/Craft")
+const Craft = require("../../jobs/Craft");
 // Controller foundation
 const Controller = require("../Controller");
 const { body }   = require('express-validator');

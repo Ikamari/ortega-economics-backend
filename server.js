@@ -28,10 +28,10 @@ const connectToDB = () => {
     mongoose.connection
         .on("error", (error) => onDBConnectionError(error))
         .once("open", () => onDBConnectionSuccess());
-}
+};
 
 const onDBConnectionSuccess = () => {
-    console.log(`Successfully connected to DB\nRunning migrations...`);
+    console.log("Successfully connected to DB");
 
     // Run tests if server was started with corresponding argument
     if (process.argv[2] === "test") {
@@ -41,6 +41,7 @@ const onDBConnectionSuccess = () => {
         return;
     }
 
+    console.log("Running migrations...");
     migrator.run("up")
         .then(() => {
             global.isReady = true;
