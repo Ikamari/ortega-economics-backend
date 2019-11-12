@@ -1,3 +1,7 @@
+/**
+ * @deprecated all craft-related stuff is available inside Building model
+ */
+
 // Database
 const { model, Types } = require("mongoose");
 // Helpers
@@ -211,7 +215,7 @@ class CraftProcessCreator {
             crafting_fraction_id: this.building.fraction_id,
             crafting_characters:  this.participants,
             crafting_facilities:  this.facilitiesToUse,
-            finish_at: moment().add(this.craftingTime, "minutes").toDate()
+            can_be_finished_after: moment().add(this.craftingTime, "minutes").toDate()
         });
 
         return id;
@@ -319,7 +323,7 @@ const cancelCraft = async (character, building, craftProcess, force = false, thr
             // Character must have access to the building
             checkAccessToBuilding(character, building);
 
-            if (craftProcess.finish_at <= Date.now()) {
+            if (craftProcess.can_be_finished_after <= Date.now()) {
                 throw new Error("Craft process cannot be cancelled when craft time has passed")
             }
         }
@@ -349,7 +353,7 @@ const finishCraft = async (character, building, craftProcess, force = false, thr
             // Character must have access to the building
             checkAccessToBuilding(character, building);
 
-            if (craftProcess.finish_at > Date.now()) {
+            if (craftProcess.can_be_finished_after > Date.now()) {
                 throw new Error("Craft process cannot be finished until craft time has passed")
             }
         }
@@ -402,7 +406,7 @@ const reworkCraft = async (character, building, craftProcess, force = false, thr
             checkAccessToBuilding(character, building)
         }
 
-        if (craftProcess.finish_at > Date.now()) {
+        if (craftProcess.can_be_finished_after > Date.now()) {
             throw new Error("Crafted item cannot be reworked until craft time has passed")
         }
 
@@ -447,13 +451,13 @@ const continueCraft = async (character, building, craftProcess, force = false, t
         }
 
         // Calculate new time when craft process will be finished
-        const currentFinishAt = moment(craftProcess.finish_at);
+        const currentFinishAt = moment(craftProcess.can_be_finished_after);
         const stoppedAt       = moment(craftProcess.stopped_at);
         const timeDifference  = Math.abs(moment.duration(currentFinishAt.diff(stoppedAt)).asSeconds());
 
         craftProcess.is_stopped = false;
         craftProcess.stopped_at = null;
-        craftProcess.finish_at  = moment().add(timeDifference, "seconds").toDate();
+        craftProcess.can_be_finished_after  = moment().add(timeDifference, "seconds").toDate();
         await building.save();
 
         return true;
@@ -470,7 +474,7 @@ const stopCraft = async (character, building, craftProcess, force = false, throw
             checkAccessToBuilding(character, building);
         }
 
-        if (craftProcess.is_stopped || craftProcess.finish_at < Date.now() || craftProcess.is_finished) {
+        if (craftProcess.is_stopped || craftProcess.can_be_finished_after < Date.now() || craftProcess.is_finished) {
             throw new Error("Craft process cannot be stopped")
         }
 

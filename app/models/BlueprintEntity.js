@@ -21,7 +21,7 @@ const BlueprintEntitySchema = new Schema({
 
 BlueprintEntitySchema.virtual("blueprint").get(async function () {
     return await model("Blueprint").findOne({ _id: this.blueprint_id });
-})
+});
 
 const BlueprintEntityModel = model("BlueprintEntity", BlueprintEntitySchema);
 

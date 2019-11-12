@@ -47,7 +47,7 @@ const CraftProcessSchema = new Schema({
     creator_character_id: {
         type: Schema.Types.ObjectId,
         validate: exists("Character"),
-        required: true
+        default: null
     },
     crafting_fraction_id: {
         type: Schema.Types.ObjectId,
@@ -72,7 +72,7 @@ const CraftProcessSchema = new Schema({
         default: Date.now,
         required: true
     },
-    finish_at: {
+    can_be_finished_after: {
         type: Date,
         required: true
     },
@@ -83,6 +83,11 @@ const CraftProcessSchema = new Schema({
     },
     finished_at: {
         type: Date
+    },
+    is_reworked: {
+        type: Boolean,
+        default: false,
+        required: true
     },
     is_failed: {
         type: Boolean,
