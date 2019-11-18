@@ -3,6 +3,11 @@ const express              = require("express");
 const { validationResult } = require("express-validator");
 const ErrorResponse        = require("./ErrorResponse");
 
+const wrap = fn => (...args) => fn(...args).catch(args[2]);
+
+/**
+ * @property {express.Router} router
+ */
 class Controller {
 
     constructor(skipRoutesCreation = false) {
@@ -16,7 +21,7 @@ class Controller {
         throw new Error(`createRoutes must be defined in ${this.constructor.name}`);
     }
 
-    checkValidation(request, next) {
+    validate(request, next) {
         const result = validationResult(request);
         if (!result.isEmpty()) {
             let errorInfo = "";
@@ -29,10 +34,17 @@ class Controller {
         return true
     }
 
+    updateIfDefined(document, property, value) {
+        if (value !== "undefined") {
+            document[property] = value;
+        }
+    }
+
     getRouter() {
         return this.router;
     }
 
 }
 
-module.exports = Controller;
+module.exports      = Controller;
+module.exports.wrap = wrap;

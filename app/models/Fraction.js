@@ -66,7 +66,7 @@ FractionSchema.methods.hasResources = async function(resourcesToFind, throwExcep
         return false
     }
     return true
-}
+};
 
 FractionSchema.methods.hasEnergy = function(amountOfEnergy, doBlackoutOnFalse = false, rejectOnFalse = true) {
     return new Promise((resolve, reject) => {
@@ -86,7 +86,7 @@ FractionSchema.methods.hasEnergy = function(amountOfEnergy, doBlackoutOnFalse = 
             }
         })
     })
-}
+};
 
 FractionSchema.methods.editResources = async function(resources, strictCheck = true) {
     // todo: Try to use transactions (replica sets are required)
@@ -157,7 +157,7 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
                 building.resources.set(resourceId, building.resources.get(resourceId) - amountToRemove);
             }
         }
-    })
+    });
 
     // Check whether all resources was successfully added or subtracted
     if (strictCheck) {
@@ -182,7 +182,7 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
 
 FractionSchema.methods.editResource = async function(resource, strictCheck = true) {
     this.editResources([resource], strictCheck);
-}
+};
 
 // Disable all facilities of fraction
 FractionSchema.methods.blackout = function() {
@@ -193,7 +193,30 @@ FractionSchema.methods.blackout = function() {
             })).then(() => resolve(true))
         })
     })
-}
+};
+
+FractionSchema.methods.addTrait = function(traitId) {
+    const index = this.hasTrait(traitId);
+    if (index === false) {
+        this.traits.push(traitId);
+        return true;
+    }
+    return false;
+};
+
+FractionSchema.methods.hasTrait = function(traitId) {
+    const index = this.traits.indexOf(traitId);
+    return index !== -1 ? index : false;
+};
+
+FractionSchema.methods.removeTrait = function(traitId) {
+    const index = this.hasTrait(traitId);
+    if (index !== false) {
+        this.traits.splice(index, 1);
+        return true;
+    }
+    return false;
+};
 
 FractionSchema.virtual("free_members").get(async function() {
     const
@@ -209,13 +232,13 @@ FractionSchema.virtual("free_members").get(async function() {
                 busyMembers[craftingCharacterId.toString()] = true;
             })
         })
-    })
+    });
 
     // Get free members
     return members.map((member) => {
         if (!(member._id.toString() in busyMembers)) return member
     }).filter(member => member !== undefined)
-})
+});
 
 // Get overall info about free/consumed/produced energy in fraction
 FractionSchema.virtual("energy").get(function() {
@@ -243,7 +266,7 @@ FractionSchema.virtual("energy").get(function() {
             })
         })
     })
-})
+});
 
 // Get resources from all fraction's buildings
 FractionSchema.virtual("resources").get(async function() {

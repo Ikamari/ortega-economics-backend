@@ -19,6 +19,8 @@ app.use(bodyParser.json());
 
 // Server
 app.use("/server/test", ServerControllers.TestController);
+app.use("/server/fractions", ServerControllers.FractionsController);
+app.use("/server/traits", ServerControllers.TraitsController);
 
 // Admin
 // app.use("/admin/jobs", AdminControllers.ProductionController);
