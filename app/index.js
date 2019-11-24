@@ -21,6 +21,8 @@ app.use(bodyParser.json());
 app.use("/server/test", ServerControllers.TestController);
 app.use("/server/fractions", ServerControllers.FractionsController);
 app.use("/server/traits", ServerControllers.TraitsController);
+app.use("/server/characters", ServerControllers.CharactersController);
+app.use("/server/perks", ServerControllers.PerksController);
 
 // Admin
 // app.use("/admin/jobs", AdminControllers.ProductionController);
@@ -37,11 +39,6 @@ app.use("/server/traits", ServerControllers.TraitsController);
 // app.use("/admin/characters",         AdminControllers.CharacterModelController);
 // app.use("/admin/resources",          AdminControllers.ResourceModelController);
 // app.use("/admin/traits",             AdminControllers.TraitModelController);
-
-// Client - Models
-// app.use("/fractions", ModelControllers.FractionsController);
-// app.use("/buildings", ModelControllers.BuildingsController);
-// app.use("/resources", ModelControllers.ResourcesController);
 
 // Exception handle middleware
 app.use(function (error, request, response, next) {

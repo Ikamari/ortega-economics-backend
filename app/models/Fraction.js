@@ -34,6 +34,8 @@ const SquadSchema = new Schema({
     }
 });
 
+// todo: Character model has similar parts of code that should be replaced into one file
+
 const FractionSchema = new Schema({
     name: {
         type: String,
@@ -195,6 +197,8 @@ FractionSchema.methods.blackout = function() {
     })
 };
 
+//region - Traits
+
 FractionSchema.methods.addTrait = function(traitId) {
     const index = this.hasTrait(traitId);
     if (index === false) {
@@ -217,6 +221,8 @@ FractionSchema.methods.removeTrait = function(traitId) {
     }
     return false;
 };
+
+//endregion
 
 FractionSchema.virtual("free_members").get(async function() {
     const
@@ -270,7 +276,7 @@ FractionSchema.virtual("energy").get(function() {
 
 // Get resources from all fraction's buildings
 FractionSchema.virtual("resources").get(async function() {
-    const buildings = await model("Building").find({ fraction_id: this._id });
+    const buildings = await this.buildings;
 
     let resources = {};
     buildings.map((building) => {

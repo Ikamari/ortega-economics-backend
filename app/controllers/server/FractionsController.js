@@ -27,7 +27,7 @@ class FractionsController extends ServerController {
 
         // Create new fraction
         this.router.post("/", [
-            body("name").isString().exists()
+            body("name").isString().exists({ checkFalsy: true })
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
@@ -57,13 +57,15 @@ class FractionsController extends ServerController {
             const fraction = await model("Fraction").findById(request.params.fraction_id);
             if (!fraction) return response.status(404).send("Not found");
 
+            // todo: detach all buildings and characters from specified fraction
+
             await fraction.delete();
             return response.status(200).send(true);
         }));
 
         // Add trait to fraction
         this.router.post("/:fraction_id/traits", [
-            body("trait_id").isString().exists(true, true)
+            body("trait_id").isString().exists({ checkFalsy: true })
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
@@ -77,7 +79,7 @@ class FractionsController extends ServerController {
 
         // Remove trait from fraction
         this.router.delete("/:fraction_id/traits", [
-            body("trait_id").isString().exists(true, true)
+            body("trait_id").isString().exists({ checkFalsy: true })
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
