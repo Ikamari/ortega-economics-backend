@@ -23,6 +23,8 @@ app.use("/server/fractions", ServerControllers.FractionsController);
 app.use("/server/traits", ServerControllers.TraitsController);
 app.use("/server/characters", ServerControllers.CharactersController);
 app.use("/server/perks", ServerControllers.PerksController);
+app.use("/server/buildings", ServerControllers.BuildingsController);
+app.use("/server/facilities", ServerControllers.FacilitiesController);
 
 // Admin
 // app.use("/admin/jobs", AdminControllers.ProductionController);

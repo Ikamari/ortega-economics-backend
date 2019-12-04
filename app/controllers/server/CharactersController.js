@@ -26,7 +26,9 @@ class CharactersController extends ServerController {
         }));
 
         // Create new character
-        this.router.post("/", wrap(async (request, response, next) => {
+        this.router.post("/", [
+            body("name").isString().exists({ checkFalsy: true })
+        ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
             const character = await model("Character").create({

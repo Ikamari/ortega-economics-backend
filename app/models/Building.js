@@ -10,6 +10,8 @@ const { exists } = require("../validators/General");
 // Schemas
 const FacilityEntitySchema = require("./schemas/FacilityEntity");
 const CraftProcessSchema = require("./schemas/CraftProcess");
+// Exception
+const ErrorResponse = require("@controllers/ErrorResponse");
 
 const ResourceTurnoverSchema = new Schema({
     resource_id: {
@@ -113,6 +115,7 @@ const BuildingSchema = new Schema({
         min: 0,
         default: 0
     },
+    // todo: energy consumption by the building?
     production_priority: {
         type: Int32,
         required: true,
@@ -126,6 +129,7 @@ const BuildingSchema = new Schema({
     defense_level: {
         type: Int32,
         required: true,
+        min: 0,
         default: 0
     }
 });
@@ -254,6 +258,44 @@ BuildingSchema.methods.disable = async function(isBlackout = false) {
     await this.save();
     return true;
 };
+
+//region - Ownership
+
+BuildingSchema.methods.attachToFraction = async function(fractionId, enable = false) {
+    // Detach from previous owner
+    await this.detachFromOwner();
+    this.fraction_id = fractionId;
+    if (enable) await this.enable();
+    return true;
+};
+
+BuildingSchema.methods.detachFromFraction = async function() {
+    if (!this.fraction_id) return false;
+    await this.disable();
+    this.fraction_id = null;
+    return true;
+};
+
+BuildingSchema.methods.attachToCharacter = async function(characterId, enable = false) {
+    // Detach from previous owner
+    await this.detachFromOwner();
+    this.character_id = characterId;
+    if (enable) await this.enable();
+    return true;
+};
+
+BuildingSchema.methods.detachFromCharacter = async function() {
+    if (!this.character_id) return false;
+    await this.disable();
+    this.character_id = null;
+    return true;
+};
+
+BuildingSchema.methods.detachFromOwner = async function() {
+    return await this.detachFromFraction() || await this.detachFromCharacter();
+};
+
+//endregion
 
 //region - Resources
 
@@ -475,11 +517,11 @@ BuildingSchema.methods.removeFacility = function(facilityEntityId) {
 
 //region - Production/Consumption of resources
 
-BuildingSchema.methods.addProduction = function (turnover, autoSave = true) {
+BuildingSchema.methods.addProduction = function (resource_id, amount, chance, autoSave = true) {
     this.produces.push({
-        resource_id: turnover._id,
-        amount:      turnover.amount,
-        chance:      turnover.chance
+        resource_id: resource_id,
+        amount:      amount,
+        chance:      chance
     });
     return autoSave ? this.save() : true;
 };
@@ -487,17 +529,17 @@ BuildingSchema.methods.addProduction = function (turnover, autoSave = true) {
 BuildingSchema.methods.removeProduction = function (turnoverId, autoSave = true) {
     const turnover = this.produces.id(turnoverId);
     if (!turnover) {
-        throw new Error("Can't find specified turnover")
+        throw new ErrorResponse("Can't find specified turnover")
     }
     turnover.remove();
     return autoSave ? this.save() : true;
 };
 
-BuildingSchema.methods.addConsumption = function (turnover, autoSave = true) {
+BuildingSchema.methods.addConsumption = function (resource_id, amount, chance, autoSave = true) {
     this.consumes.push({
-        resource_id: turnover._id,
-        amount:      turnover.amount,
-        chance:      turnover.chance
+        resource_id: resource_id,
+        amount:      amount,
+        chance:      chance
     });
     return autoSave ? this.save() : true;
 };
@@ -505,7 +547,7 @@ BuildingSchema.methods.addConsumption = function (turnover, autoSave = true) {
 BuildingSchema.methods.removeConsumption = function (turnoverId, autoSave = true) {
     const turnover = this.produces.id(turnoverId);
     if (!turnover) {
-        throw new Error("Can't find specified turnover")
+        throw new ErrorResponse("Can't find specified turnover")
     }
     turnover.remove();
     return autoSave ? this.save() : true;
@@ -884,11 +926,15 @@ BuildingSchema.methods.stopAllCrafts = async function() {
     return true;
 };
 
-BuildingSchema.methods.characterHasAccess = function(character) {
-    if (character.fraction_id.equals(this.fraction_id) || character._id.equals(this.character_id)) {
+BuildingSchema.methods.characterHasAccess = function(character, throwException = true) {
+    if (
+        (this.character_id && this.character_id.equals(character.id)) ||
+        (character.fraction_id && this.fraction_id && this.fraction_id.equals(character.fraction_id))
+    ) {
         return true;
     }
-    throw new Error("Character doesn't have access to building")
+    if (throwException) throw new ErrorResponse("Character doesn't have access to building");
+    return false;
 };
 
 BuildingSchema.methods.getCraftProcesses = function (getFinished) {

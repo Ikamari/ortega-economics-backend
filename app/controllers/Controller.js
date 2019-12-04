@@ -34,8 +34,9 @@ class Controller {
         return true
     }
 
-    updateIfDefined(document, property, value) {
+    updateIfDefined(document, property, value, callback) {
         if (value !== "undefined") {
+            if (typeof callback === "function") callback(value);
             document[property] = value;
         }
     }

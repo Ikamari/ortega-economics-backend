@@ -1,6 +1,6 @@
 class ErrorResponse extends Error {
 
-    constructor(message, httpCode = 500) {
+    constructor(message, httpCode = 400) {
         super(message);
 
         this.httpCode = httpCode;

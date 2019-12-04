@@ -5,17 +5,17 @@ const { body } = require('express-validator');
 // Database
 const { model } = require("mongoose");
 
-class PerksController extends ServerController {
+class FacilitesController extends ServerController {
 
     createRoutes() {
-        // Get all perks
+        // Get all facilities
         this.router.get("/", wrap(async (request, response, next) => {
             return response.status(200).send(
-                await model("Perk").find({})
+                await model("Facility").find({})
             );
         }));
     }
 
 }
 
-module.exports = PerksController;
+module.exports = FacilitesController;
