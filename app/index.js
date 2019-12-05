@@ -25,6 +25,7 @@ app.use("/server/characters", ServerControllers.CharactersController);
 app.use("/server/perks", ServerControllers.PerksController);
 app.use("/server/buildings", ServerControllers.BuildingsController);
 app.use("/server/facilities", ServerControllers.FacilitiesController);
+app.use("/server/recipes", ServerControllers.RecipesController);
 
 // Admin
 // app.use("/admin/jobs", AdminControllers.ProductionController);
