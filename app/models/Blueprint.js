@@ -15,7 +15,7 @@ const RequiredFacilitiesSchema = new Schema({
         type: Schema.Types.ObjectId,
         validate: exists("FacilityType")
     }
-})
+});
 
 const BlueprintModel = model("Blueprint", new Schema({
     name: {
