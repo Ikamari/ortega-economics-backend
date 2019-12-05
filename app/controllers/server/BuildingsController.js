@@ -27,12 +27,12 @@ class BuildingsController extends ServerController {
         // Create building
         this.router.post("/", [
             body("name").isString().exists({ checkFalsy: true }),
-            body("available_workplaces").isInt({ min: 0 }),
-            body("storage_size").isInt({ min: 0 }),
-            body("energy_production").isInt({ min: 0 }),
-            body("production_priority").isInt(),
-            body("storage_priority").isInt(),
-            body("defense_level").isInt({ min: 0 })
+            body("available_workplaces").isInt({ min: 0 }).optional(),
+            body("storage_size").isInt({ min: 0 }).optional(),
+            body("energy_production").isInt({ min: 0 }).optional(),
+            body("production_priority").isInt().optional(),
+            body("storage_priority").isInt().optional(),
+            body("defense_level").isInt({ min: 0 }).optional()
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
@@ -50,32 +50,32 @@ class BuildingsController extends ServerController {
 
         // Update building
         this.router.patch("/:building_id", [
-            body("name").isString().exists({ checkFalsy: true }),
-            body("available_workplaces").isInt({ min: 0 }),
-            body("storage_size").isInt({ min: 0 }),
-            body("energy_production").isInt({ min: 0 }),
-            body("production_priority").isInt(),
-            body("storage_priority").isInt(),
-            body("defense_level").isInt({ min: 0 })
+            body("name").isString().optional(),
+            body("available_workplaces").isInt({ min: 0 }).optional(),
+            body("storage_size").isInt({ min: 0 }).optional(),
+            body("energy_production").isInt({ min: 0 }).optional(),
+            body("production_priority").isInt().optional(),
+            body("storage_priority").isInt().optional(),
+            body("defense_level").isInt({ min: 0 }).optional()
         ],  wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             this.updateIfDefined(building, "name", request.body.name);
-            this.updateIfDefined(building, "available_workplaces", request.body.name);
-            this.updateIfDefined(building, "storage_size", request.body.name, (newStorageSize) => {
+            this.updateIfDefined(building, "available_workplaces", request.body.available_workplaces);
+            this.updateIfDefined(building, "storage_size", request.body.storage_size, (newStorageSize) => {
                 // Check whether new storage size is valid
                 // todo: check should be changed once the used storage calculation will be redone
                 if (newStorageSize < building.used_storage) {
                     throw new Error("New storage size cannot be less than currently used storage space");
                 }
             });
-            this.updateIfDefined(building, "energy_production", request.body.name);
-            this.updateIfDefined(building, "production_priority", request.body.name);
-            this.updateIfDefined(building, "storage_priority", request.body.name);
-            this.updateIfDefined(building, "defense_level", request.body.name);
+            this.updateIfDefined(building, "energy_production", request.body.energy_production);
+            this.updateIfDefined(building, "production_priority", request.body.production_priority);
+            this.updateIfDefined(building, "storage_priority", request.body.storage_priority);
+            this.updateIfDefined(building, "defense_level", request.body.defense_level);
             await building.save();
 
             return response.status(200).send(building);
@@ -83,7 +83,7 @@ class BuildingsController extends ServerController {
 
         // Delete building
         this.router.delete("/:building_id", wrap(async (request, response, next) => {
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.detachFromOwner();
@@ -98,7 +98,7 @@ class BuildingsController extends ServerController {
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             const character = await model("Character").findById(request.params.character_id);
@@ -113,7 +113,7 @@ class BuildingsController extends ServerController {
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.attachToFraction(request.body.fraction_id);
@@ -128,7 +128,7 @@ class BuildingsController extends ServerController {
         ],  wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.attachToCharacter(request.body.character_id);
@@ -139,7 +139,7 @@ class BuildingsController extends ServerController {
 
         // Detach building from character/fraction
         this.router.delete(/\/:building_id\/(owner|fraction|character)/, wrap(async (request, response, next) => {
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.detachFromOwner();
@@ -156,7 +156,7 @@ class BuildingsController extends ServerController {
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.addProduction(
@@ -169,7 +169,7 @@ class BuildingsController extends ServerController {
 
         // Remove resources production from the building
         this.router.delete("/:building_id/production/:production_id", wrap(async (request, response, next) => {
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.removeProduction(request.params.production_id);
@@ -184,7 +184,7 @@ class BuildingsController extends ServerController {
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.addConsumption(
@@ -197,7 +197,7 @@ class BuildingsController extends ServerController {
 
         // Remove resources consumption from the building
         this.router.delete("/:building_id/consumption/:consumption_id", wrap(async (request, response, next) => {
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.removeConsumption(request.params.production_id);
@@ -217,7 +217,7 @@ class BuildingsController extends ServerController {
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.editResources(request.body.resources);
@@ -231,7 +231,7 @@ class BuildingsController extends ServerController {
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.editResource({
@@ -243,7 +243,7 @@ class BuildingsController extends ServerController {
 
         // Enable building
         this.router.post("/:building_id/enable", wrap(async (request, response, next) => {
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.enable();
@@ -252,7 +252,7 @@ class BuildingsController extends ServerController {
 
         // Disable building
         this.router.post("/:building_id/disable", wrap(async (request, response, next) => {
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.disable();
@@ -265,7 +265,7 @@ class BuildingsController extends ServerController {
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.addFacility(request.body.facility_id);
@@ -274,7 +274,7 @@ class BuildingsController extends ServerController {
 
         // Remove facility from the building
         this.router.delete("/:building_id/facilities/:facility_entity_id", wrap(async (request, response, next) => {
-            const building = await model("building").findById(request.params.building_id);
+            const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
             await building.removeFacility(request.params.facility_entity_id);
