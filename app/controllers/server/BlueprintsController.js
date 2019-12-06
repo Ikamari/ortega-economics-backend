@@ -7,74 +7,78 @@ const { model } = require("mongoose");
 
 class BlueprintsController extends ServerController {
 
-	 createRoutes() {
-        // Get all blueprints or entites
-        this.router.get("/", [
-        	body("entities").isBoolean().optional()
-        	], wrap(async (request, response, next) => {
-        		if (!this.validate(request, next)) return;
-        		if(request.body.entities != true){ 
-            	return response.status(200).send(
+    createRoutes() {
+        // Get all blueprints
+        this.router.get("/", wrap(async (request, response, next) => {
+            return response.status(200).send(
                 await model("Blueprint").find({}).select("_id name")
-            )} else response.status(200).send(
-    			await model("BlueprintEntity").find({}).select("_id blueprint_id quality")
-    		);
+            );
         }));
 
-    	//Get blueprint info
-    	this.router.get("/:blueprint_id", wrap(async (request,response,next) => {
+        // Get blueprint info
+        this.router.get("/:blueprint_id", wrap(async (request, response, next) => {
+            const blueprint = await model("Blueprint").findById(request.params.blueprint_id);
+            return blueprint ?
+                response.status(200).send(blueprint) :
+                response.status(404).send("Not found.");
+        }));
 
-    		const blueprint = await model("Blueprint").findById(request.params.blueprint_id);
-    			return blueprint ?
-    			response.status(200).send(blueprint) :
-    			response.status(404).send("Not found.")
-    	}));
+        // Get entities of blueprint
+        this.router.get("/:blueprint_id/entities", wrap(async (request, response, next) => {
+            const blueprint = await model("Blueprint").findById(request.params.blueprint_id);
+            if (!blueprint) return response.status(404).send("Not found.");
+            return response.status(200).send(await blueprint.entities)
+        }));
 
-    	//Create blueprint entity by ID
-        this.router.post("/:blueprint_id/", [
-            body("quality").isInt().exists({ checkFalsy: true })
+        // Get blueprint entity info
+        // Currently useless, because returns same data as "Get entities of blueprint" method and does more DB requests
+        this.router.get("/:blueprint_id/entities/:entity_id", wrap(async (request, response, next) => {
+            const blueprint = await model("Blueprint").findById(request.params.blueprint_id);
+            if (!blueprint) return response.status(404).send("Not found.");
+
+            return response.status(200).send(
+                await blueprint.entities.find({ _id: request.params.entity_id })
+            );
+        }));
+
+        // Create new blueprint entity
+        this.router.post("/:blueprint_id/entities", [
+            body("quality").isInt({ min: 0, max: 20 }).optional()
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const blueprintentity = await model("BlueprintEntity").create({
+            const blueprintEntity = await model("BlueprintEntity").create({
                 blueprint_id: request.params.blueprint_id,
-                quality: request.body.quality
+                quality:      request.body.quality || 0
             });
-            return response.status(200).send(blueprintentity);
+            return response.status(200).send(blueprintEntity);
         }));
 
-        //Edit blueprint entity quality by ID
-        this.router.patch("/:blueprint_id/:entity_id", [
-            body("quality").isInt().exists({ checkFalsy: true })
+        // Edit blueprint entity
+        this.router.patch("/:blueprint_id/entities/:entity_id", [
+            body("quality").isInt({ min: 0, max: 20 }).optional()
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
-            const blueprintentity = await model("BlueprintEntity").findById(request.params.entity_id);
-            if(!blueprintentity) return response.status(404).send("No such entity")
+            const blueprintEntity = await model("BlueprintEntity").findById(request.params.entity_id);
+            if (!blueprintEntity) return response.status(404).send("No such entity");
 
-            this.updateIfDefined(blueprintentity, "quality", request.body.quality);
-        	await blueprintentity.save();
+            this.updateIfDefined(blueprintEntity, "quality", request.body.quality);
+            await blueprintEntity.save();
 
-            return response.status(200).send(blueprintentity);
+            return response.status(200).send(blueprintEntity);
         }));
 
-        //Delete blueprint entity
-        this.router.delete("/:blueprint_id/:entity_id", wrap(async (request, response, next) => {
-            const blueprintentity = await model("BlueprintEntity").findById(request.params.entity_id);
-            if(!blueprintentity) return response.status(404).send("No such entity")
+        // (UNSAFE) Delete blueprint entity
+        this.router.delete("/:blueprint_id/entities/:entity_id", wrap(async (request, response, next) => {
+            const blueprintEntity = await model("BlueprintEntity").findById(request.params.entity_id);
+            if (!blueprintEntity) return response.status(404).send("No such entity");
 
-			await blueprintentity.delete();
-			return response.status(200).send(true);
+            await blueprintEntity.delete();
+            return response.status(200).send(true);
         }));
 
-        //Get blueprint entity info
-        this.router.get("/:blueprint_id/:entity_id", wrap(async (request, response, next) => {
-            const blueprintentity = await model("BlueprintEntity").findById(request.params.entity_id);
-            if(!blueprintentity) return response.status(404).send("No such entity")
-
-			return response.status(200).send(blueprintentity);
-        }));
-
-}}
+    }
+}
 
 module.exports = BlueprintsController;

@@ -6,7 +6,7 @@ const CharactersController = require("./CharactersController");
 const PerksController      = require("./PerksController");
 const BuildingsController  = require("./BuildingsController");
 const FacilitiesController = require("./FacilitiesController");
-const RecipesController = require("./RecipesController");
+const RecipesController    = require("./RecipesController");
 const BlueprintsController = require("./BlueprintsController");
 
 module.exports.TestController       = (new TestController()).getRouter();
@@ -16,5 +16,5 @@ module.exports.CharactersController = (new CharactersController()).getRouter();
 module.exports.PerksController      = (new PerksController()).getRouter();
 module.exports.BuildingsController  = (new BuildingsController()).getRouter();
 module.exports.FacilitiesController = (new FacilitiesController()).getRouter();
-module.exports.RecipesController = (new RecipesController()).getRouter();
+module.exports.RecipesController    = (new RecipesController()).getRouter();
 module.exports.BlueprintsController = (new BlueprintsController()).getRouter();
