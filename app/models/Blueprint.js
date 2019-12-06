@@ -17,7 +17,7 @@ const RequiredFacilitiesSchema = new Schema({
     }
 });
 
-const BlueprintModel = model("Blueprint", new Schema({
+const BlueprintSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -50,6 +50,12 @@ const BlueprintModel = model("Blueprint", new Schema({
         required: true,
         default: []
     }
-}));
+});
+
+BlueprintSchema.virtual("entities").get(function () {
+    return model("BlueprintEntity").find({ blueprint_id: this._id });
+});
+
+const BlueprintModel = model("Blueprint", BlueprintSchema);
 
 module.exports = BlueprintModel;
