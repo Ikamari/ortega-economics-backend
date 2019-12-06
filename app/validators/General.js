@@ -64,8 +64,8 @@ const includes = (array) => {
         validator: (value) => (array.includes(value.toString())),
         message: props => `${props.path} must be equal to:${array.map((value) => (" " + value))}`
     }
-}
+};
 
-module.exports.existsIn = existsIn
-module.exports.exists   = exists
-module.exports.includes = includes
+module.exports.existsIn = existsIn;
+module.exports.exists   = exists;
+module.exports.includes = includes;
