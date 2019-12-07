@@ -16,9 +16,11 @@ class RecipesController extends ServerController {
 
         // Get recipe info
         this.router.get("/:recipe_id", wrap(async (request, response, next) => {
-            const recipe = await model("Recipe").findById(request.params.recipe_id);
+            const recipe = await model("Recipe")
+                .findById(request.params.recipe_id)
+                .populate("required_resources.resource", "name");
             return recipe ?
-                response.status(200).send(recipe) :
+                response.status(200).send(recipe.toJSON({ includeResourceName: true })) :
                 response.status(404).send("Not found")
         }));
 
