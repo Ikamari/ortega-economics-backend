@@ -17,7 +17,7 @@ const ResourceSchema = new Schema({
     }
 });
 
-ResourceSchema.virtual("resource", {
+ResourceSchema.virtual("properties", {
     ref:          "Resource",
     localField:   "_id",
     foreignField: "_id",
@@ -25,8 +25,8 @@ ResourceSchema.virtual("resource", {
 });
 
 ResourceSchema.set("toJSON", { transform: function(doc, ret, options) {
-    if (options.includeResourceName && doc.resource) {
-        ret.name = doc.resource.name;
+    if (options.includeResourceName && doc.properties) {
+        ret.name = doc.properties.name;
     }
     return ret;
 }});
