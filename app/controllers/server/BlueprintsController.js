@@ -22,7 +22,7 @@ class BlueprintsController extends ServerController {
                 .populate("required_facilities.properties", "name")
                 .populate("required_resources.properties", "name");
             return blueprint ?
-                response.status(200).send(blueprint.toJSON({ includeFacilityName: true, includeResourceName: true })) :
+                response.status(200).send(blueprint.toJSON({ includeFacilityTypeName: true, includeResourceName: true })) :
                 response.status(404).send("Not found.");
         }));
 

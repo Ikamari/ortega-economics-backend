@@ -19,10 +19,10 @@ class RecipesController extends ServerController {
             const recipe = await model("Recipe")
                 .findById(request.params.recipe_id)
                 .populate("required_resources.properties", "name")
-                .populate("facility_type_properties", "facility_type_name");
+                .populate("facility_type_properties", "name");
             return recipe ?
                 response.status(200)
-                .send(recipe.toJSON({ includeFacilityName: true, includeResourceName: true})) :
+                .send(recipe.toJSON({ includeFacilityTypeName: true, includeResourceName: true})) :
                 response.status(404).send("Not found")
         }));
 

@@ -25,7 +25,10 @@ const migrator = new migrateMongoose({
 const connectToDB = () => {
     console.log("Connecting to DB...");
     mongoose.set("useCreateIndex", true);
-    mongoose.connect(mongoUrl, { useNewUrlParser: true });
+    mongoose.connect(mongoUrl, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    });
     mongoose.connection
         .on("error", (error) => onDBConnectionError(error))
         .once("open", () => onDBConnectionSuccess());

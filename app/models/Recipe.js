@@ -55,8 +55,8 @@ RecipeSchema.virtual("facility_type_properties", {
 });
 
 RecipeSchema.set("toJSON", { transform: function(doc, ret, options) {
-    if (options.includeFacilityName && doc.properties) {
-        ret.facility_type_name = doc.properties.facility_type_name;
+    if (options.includeFacilityTypeName && doc.facility_type_properties) {
+        ret.required_facility_type_name = doc.facility_type_properties.name;
     }
     return ret;
 }});
