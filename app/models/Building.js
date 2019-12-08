@@ -35,17 +35,17 @@ const ResourceTurnoverSchema = new Schema({
 });
 
 const WorkersConsumptionSchema = new Schema({
-    food_consumption: {
+    food: {
         type: Int32,
         required: true,
         default: 1
     },
-    water_consumption: {
+    water: {
         type: Int32,
         required: true,
         default: 1
     },
-    money_consumption: {
+    money: {
         type: Int32,
         required: true,
         default: 0
@@ -57,6 +57,21 @@ const BuildingSchema = new Schema({
         type: Schema.Types.ObjectId,
         validate: exists("Fraction"),
         default: null
+    },
+    money: {
+        type: Int32,
+        required: true,
+        default: 0
+    },
+    food: {
+        type: Int32,
+        required: true,
+        default: 0
+    },
+    water: {
+        type: Int32,
+        required: true,
+        default: 0
     },
     character_id: {
         type: Schema.Types.ObjectId,
@@ -164,6 +179,14 @@ const BuildingSchema = new Schema({
         required: true,
         min: 0,
         default: 0
+    }
+});
+
+BuildingSchema.pre("validate", async function(next) {
+    if (this.used_workplaces + this.used_workplaces_by_phantoms > this.available_workplaces){
+        next(new ErrorResponse("Used workplaces amount cannot be higher than available workplaces amount"));     
+    } else {
+        next();
     }
 });
 

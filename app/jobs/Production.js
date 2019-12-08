@@ -11,6 +11,9 @@ const handleBuilding = async (building, fraction = null, throwException = true) 
         if (building.used_storage >= building.storage_size) {
             throw new Error("Specified building doesn't have any space in storage")
         }
+        if (building.used_workplaces >= building.available_workplaces){
+            throw new Error("Specified building has no available workplaces")
+        }
         if (!building.fraction_id) {
             throw new Error("Specified building won't produce anything because it doesn't belong to any fraction")
         }

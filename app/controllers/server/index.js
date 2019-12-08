@@ -8,7 +8,7 @@ const BuildingsController  = require("./BuildingsController");
 const FacilitiesController = require("./FacilitiesController");
 const RecipesController    = require("./RecipesController");
 const BlueprintsController = require("./BlueprintsController");
-const SProductionController= require("./SProductionController");
+const ProductionController= require("./ProductionController");
 
 module.exports.TestController       = (new TestController()).getRouter();
 module.exports.FractionsController  = (new FractionsController()).getRouter();
@@ -19,4 +19,4 @@ module.exports.BuildingsController  = (new BuildingsController()).getRouter();
 module.exports.FacilitiesController = (new FacilitiesController()).getRouter();
 module.exports.RecipesController    = (new RecipesController()).getRouter();
 module.exports.BlueprintsController = (new BlueprintsController()).getRouter();
-module.exports.SProductionController= (new SProductionController()).getRouter();
+module.exports.ProductionController= (new ProductionController()).getRouter();

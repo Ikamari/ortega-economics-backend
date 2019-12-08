@@ -7,7 +7,7 @@ const { model } = require("mongoose");
 // Jobs
 const Production = require("../../jobs/Production");
 
-class SProductionController extends ServerController {
+class ProductionController extends ServerController {
 
 
     createRoutes() {
@@ -41,4 +41,4 @@ class SProductionController extends ServerController {
 
 }
 
-module.exports = SProductionController;
+module.exports = ProductionController;
