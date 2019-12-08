@@ -6,7 +6,7 @@ const ResourceSchema = require("./schemas/Resource");
 // Validators
 const { exists } = require("../validators/General");
 
-const RecipeModel = model("Recipe", new Schema({
+const RecipeSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -45,6 +45,22 @@ const RecipeModel = model("Recipe", new Schema({
         required: true,
         default: 0
     }
-}));
+});
+
+RecipeSchema.virtual("facility_type_properties", {
+    ref:          "FacilityType",
+    localField:   "required_facility_type_id",
+    foreignField: "_id",
+    justOne:      true
+});
+
+RecipeSchema.set("toJSON", { transform: function(doc, ret, options) {
+    if (options.includeFacilityTypeName && doc.facility_type_properties) {
+        ret.required_facility_type_name = doc.facility_type_properties.name;
+    }
+    return ret;
+}});
+
+const RecipeModel = model("Recipe", RecipeSchema);
 
 module.exports = RecipeModel;

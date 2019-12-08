@@ -17,6 +17,22 @@ const RequiredFacilitiesSchema = new Schema({
     }
 });
 
+RequiredFacilitiesSchema.virtual("properties", {
+    ref:          "FacilityType",
+    localField:   "type_id",
+    foreignField: "_id",
+    justOne:      true
+});
+
+RequiredFacilitiesSchema.set("toJSON", {
+    transform: function (doc, ret, options) {
+        if (options.includeFacilityTypeName && doc.properties) {
+            ret.type_name = doc.properties.name;
+        }
+        return ret;
+    }
+});
+
 const BlueprintSchema = new Schema({
     name: {
         type: String,
