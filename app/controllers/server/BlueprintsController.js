@@ -17,9 +17,12 @@ class BlueprintsController extends ServerController {
 
         // Get blueprint info
         this.router.get("/:blueprint_id", wrap(async (request, response, next) => {
-            const blueprint = await model("Blueprint").findById(request.params.blueprint_id);
+            const blueprint = await model("Blueprint")
+                .findById(request.params.blueprint_id)
+                .populate("required_facilities.properties", "name")
+                .populate("required_resources.properties", "name");
             return blueprint ?
-                response.status(200).send(blueprint) :
+                response.status(200).send(blueprint.toJSON({ includeFacilityName: true, includeResourceName: true })) :
                 response.status(404).send("Not found.");
         }));
 

@@ -56,6 +56,20 @@ BlueprintSchema.virtual("entities").get(function () {
     return model("BlueprintEntity").find({ blueprint_id: this._id });
 });
 
+RequiredFacilitiesSchema.virtual("properties", {
+    ref:          "FacilityType",
+    localField:   "type_id",
+    foreignField: "_id",
+    justOne:      true
+});
+
+RequiredFacilitiesSchema.set("toJSON", { transform: function(doc, ret, options) {
+    if (options.includeFacilityName && doc.properties) {
+        ret.name = doc.properties.name;
+    }
+    return ret;
+}});
+
 const BlueprintModel = model("Blueprint", BlueprintSchema);
 
 module.exports = BlueprintModel;
