@@ -32,18 +32,30 @@ class BuildingsController extends ServerController {
             body("energy_production").isInt({ min: 0 }).optional(),
             body("production_priority").isInt().optional(),
             body("storage_priority").isInt().optional(),
-            body("defense_level").isInt({ min: 0 }).optional()
+            body("defense_level").isInt({ min: 0 }).optional(),
+            body("money_production").isInt().optional(),
+            body("workers_count").isInt({ min: 0 }).optional(),
+            body("phantom_workers_count").isInt({ min: 0 }).optional(),
+            body("workers_food_consumption").isInt({ min: 0 }).optional(),
+            body("workers_water_consumption").isInt({ min: 0 }).optional(),
+            body("workers_money_consumption").isInt({ min: 0 }).optional()
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
+            if((request.body.workers_count + request.body.phantom_workers_count) > request.body.available_workplaces) return response.status(400).send("Used workplaces amount cannot be higher than the available workplaces amount");
+
             const building = await model("Building").create({
-                name:                 request.body.name,
-                available_workplaces: request.body.available_workplaces,
-                storage_size:         request.body.storage_size,
-                energy_production:    request.body.energy_production,
-                production_priority:  request.body.production_priority,
-                storage_priority:     request.body.storage_priority,
-                defense_level:        request.body.defense_level
+                name:                        request.body.name,
+                available_workplaces:        request.body.available_workplaces,
+                used_workplaces:             (request.body.workers_count + request.body.phantom_workers_count),
+                used_workplaces_by_phantoms: request.body.phantom_workers_count,
+                storage_size:                request.body.storage_size,
+                energy_production:           request.body.energy_production,
+                production_priority:         request.body.production_priority,
+                storage_priority:            request.body.storage_priority,
+                defense_level:               request.body.defense_level,
+                money_production:            request.body.money_production,
+                workers_consumption:         { food_consumption: request.body.workers_food_consumption, water_consumption: request.body.workers_water_consumption, money_consumption: request.body.workers_money_consumption }
             });
             return response.status(200).send(building);
         }));
@@ -56,7 +68,10 @@ class BuildingsController extends ServerController {
             body("energy_production").isInt({ min: 0 }).optional(),
             body("production_priority").isInt().optional(),
             body("storage_priority").isInt().optional(),
-            body("defense_level").isInt({ min: 0 }).optional()
+            body("defense_level").isInt({ min: 0 }).optional(),
+            body("money_production").isInt().optional(),
+            body("workers_count").isInt({ min: 0 }).optional(),
+            body("phantom_workers_count").isInt({ min: 0 }).optional()
         ],  wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
@@ -76,6 +91,13 @@ class BuildingsController extends ServerController {
             this.updateIfDefined(building, "production_priority", request.body.production_priority);
             this.updateIfDefined(building, "storage_priority", request.body.storage_priority);
             this.updateIfDefined(building, "defense_level", request.body.defense_level);
+            this.updateIfDefined(building, "money_production", request.body.money_production);
+            this.updateIfDefined(building, "used_workplaces", (request.body.workers_count + request.body.phantom_workers_count), (newUsedWorkplaces) => {
+                if (newUsedWorkplaces > building.available_workplaces){
+                    throw new Error("New used workplaces amount cannot be more than the currently available workplaces")
+                }
+            });
+            this.updateIfDefined(building, "used_workplaces_by_phantoms", request.body.phantom_workers_count);
             await building.save();
 
             return response.status(200).send(building);

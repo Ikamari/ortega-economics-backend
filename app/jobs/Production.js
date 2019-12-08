@@ -78,7 +78,7 @@ const handleFraction = (fraction, throwException = true) => {
     )
 }
 
-const handleFractions = (throwException = false) => {
+const handleFractions = async(throwException = false) => {
     console.log("Finishing production cycle for buildings...")
     return new Promise((resolve, reject) =>
         model("Fraction").find({})

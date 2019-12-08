@@ -34,6 +34,24 @@ const ResourceTurnoverSchema = new Schema({
     }
 });
 
+const WorkersConsumptionSchema = new Schema({
+    food_consumption: {
+        type: Int32,
+        required: true,
+        default: 1
+    },
+    water_consumption: {
+        type: Int32,
+        required: true,
+        default: 1
+    },
+    money_consumption: {
+        type: Int32,
+        required: true,
+        default: 0
+    }
+})
+
 const BuildingSchema = new Schema({
     fraction_id: {
         type: Schema.Types.ObjectId,
@@ -59,6 +77,16 @@ const BuildingSchema = new Schema({
         type: Int32,
         required: true,
         default: 0
+    },
+    used_workplaces_by_phantoms:{
+        type: Int32,
+        required: true,
+        default: 0
+    },
+    workers_consumption:{
+        type: [WorkersConsumptionSchema],
+        required: true,
+        default: []
     },
     storage_size: {
         type: Int32,
@@ -93,6 +121,11 @@ const BuildingSchema = new Schema({
         type: [ResourceTurnoverSchema],
         required: true,
         default: []
+    },
+    money_production: {
+        type: Int32,
+        required: true,
+        default: 0
     },
     craft_processes: {
         type: [CraftProcessSchema],
