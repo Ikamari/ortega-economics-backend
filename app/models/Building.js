@@ -116,11 +116,6 @@ const BuildingSchema = new Schema({
         default: 0
     },
     // todo: energy consumption by the building?
-    production_priority: {
-        type: Int32,
-        required: true,
-        default: 0
-    },
     storage_priority: {
         type: Int32,
         required: true,
@@ -314,13 +309,10 @@ BuildingSchema.methods.hasResources = function(resourcesToFind, throwException =
     return true
 };
 
-// todo: add and use autosave parameter
-BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
+BuildingSchema.methods.editResources = async function(resources, strictCheck = true, autoSave = true) {
     resources = sortResources(mergeResources(resources));
     this.hasResources(resources.map((resource) => {
-        if (resource.amount < 0) {
-            return resource;
-        }
+        if (resource.amount < 0) return resource;
     }).filter(resource => resource !== undefined));
     let newUsedStorage = this.used_storage;
 
@@ -353,26 +345,16 @@ BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
         throw new Error(`Storage will be overflowed (new: ${newUsedStorage} > max: ${this.storage_size})`);
     }
 
-    // Amount of resources must be >= 0
-    this.resources.forEach((amount, resourceId) => {
-        if (amount < 0) {
-            if (strictCheck) {
-                throw new Error("Storage doesn't have enough of specific resource");
-            } else {
-                newUsedStorage += Math.abs(this.resources.get(resourceId));
-                this.resources.set(resourceId, 0)
-            }
-        }
-    });
-
     // Used storage size cannot be negative
     if (newUsedStorage < 0) {
         throw new Error("Used storage size cannot be negative");
     }
 
     this.used_storage = newUsedStorage;
-    // todo: log changes
-    return this.save();
+    if (autoSave) {
+        await this.save();
+    }
+    return true
 };
 
 // todo: add and use autosave parameter

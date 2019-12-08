@@ -1,14 +1,16 @@
-const mergeResources = (resources) => {
+const mergeResources = (...resourcesArrays) => {
     let merged = {};
-    resources.map((resource) => {
-        if (resource._id in merged) {
-            merged[resource._id].amount += resource.amount;
-        } else {
-            merged[resource._id] = {
-                _id:    resource._id,
-                amount: resource.amount
+    resourcesArrays.map((resourcesArray) => {
+        resourcesArray.map((resource) => {
+            if (resource._id in merged) {
+                merged[resource._id].amount += resource.amount;
+            } else {
+                merged[resource._id] = {
+                    _id:    resource._id,
+                    amount: resource.amount
+                }
             }
-        }
+        })
     });
     return Object.values(merged)
 };
