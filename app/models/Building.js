@@ -63,16 +63,6 @@ const BuildingSchema = new Schema({
         required: true,
         default: 0
     },
-    food: {
-        type: Int32,
-        required: true,
-        default: 0
-    },
-    water: {
-        type: Int32,
-        required: true,
-        default: 0
-    },
     character_id: {
         type: Schema.Types.ObjectId,
         validate: exists("Character"),
