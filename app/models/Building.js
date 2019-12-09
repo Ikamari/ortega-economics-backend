@@ -154,11 +154,6 @@ const BuildingSchema = new Schema({
         default: 0
     },
     // todo: energy consumption by the building?
-    production_priority: {
-        type: Int32,
-        required: true,
-        default: 0
-    },
     storage_priority: {
         type: Int32,
         required: true,
@@ -230,6 +225,7 @@ BuildingSchema.virtual("energy").get(function() {
     })
 });
 
+// todo: use async-await
 BuildingSchema.methods.hasEnergy = function(amountOfEnergy, doBlackoutOnFalse = false, rejectOnFalse = true) {
     return new Promise((resolve, reject) => {
         if (amountOfEnergy <= 0) {
@@ -359,14 +355,11 @@ BuildingSchema.methods.hasResources = function(resourcesToFind, throwException =
     return true
 };
 
-// todo: add and use autosave parameter
-BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
+BuildingSchema.methods.editResources = async function(resources, strictCheck = true, autoSave = true) {
     resources = sortResources(mergeResources(resources));
     this.hasResources(resources.map((resource) => {
-        if (resource.amount < 0) {
-            return resource;
-        }
-    }));
+        if (resource.amount < 0) return resource;
+    }).filter(resource => resource !== undefined));
     let newUsedStorage = this.used_storage;
 
     // Add or remove specified resources
@@ -398,71 +391,58 @@ BuildingSchema.methods.editResources = function(resources, strictCheck = true) {
         throw new Error(`Storage will be overflowed (new: ${newUsedStorage} > max: ${this.storage_size})`);
     }
 
-    // Amount of resources must be >= 0
-    this.resources.forEach((amount, resourceId) => {
-        if (amount < 0) {
-            if (strictCheck) {
-                throw new Error("Storage doesn't have enough of specific resource");
-            } else {
-                newUsedStorage += Math.abs(this.resources.get(resourceId));
-                this.resources.set(resourceId, 0)
-            }
-        }
-    });
-
     // Used storage size cannot be negative
     if (newUsedStorage < 0) {
         throw new Error("Used storage size cannot be negative");
     }
 
     this.used_storage = newUsedStorage;
-    // todo: log changes
-    return this.save();
+    if (autoSave) {
+        await this.save();
+    }
+    return true
 };
 
 // todo: add and use autosave parameter
 BuildingSchema.methods.editResource = function(resource, strictCheck = true) {
-    return this.editResources(resource, strictCheck)
+    return this.editResources([resource], strictCheck)
 };
 
 //endregion
 
 //region - Facilities
 
-// todo: use async-await
-BuildingSchema.methods.populateFacilities = function() {
-    return new Promise((resolve) => {
-        if (!this.populated("facilities.properties")) {
-            this.populate("facilities.properties").execPopulate().then(() => resolve(true));
-        } else {
-            resolve(true)
-        }
-    })
+BuildingSchema.methods.populateFacilities = async function() {
+    if (!this.populated("facilities.properties")) {
+        await this.populate("facilities.properties").execPopulate();
+    }
 };
 
-// todo: use async-await
-BuildingSchema.methods.freeFacilities = function(filter, sortBy, sortDirection = "ASC") {
+BuildingSchema.methods.facilityIsFree = function(facilityEntity, filter = null) {
+    if (!facilityEntity.is_active) return false;
+
+    // Facility shouldn't be present in any active craft process
+    let isFree = this.craft_processes.every((craftProcess) => {
+        return !(!craftProcess.is_finished && hasObjectId(craftProcess.crafting_facilities, facilityEntity._id));
+    });
+
+    if (isFree && filter instanceof Function) {
+        isFree = filter(facilityEntity);
+    }
+
+    return isFree;
+};
+
+BuildingSchema.methods.freeFacilities = function(filter = null, sortBy = null, sortDirection = "ASC") {
     if (this.populate() === undefined && (sortBy || filter)) {
         throw new Error("facilities.properties must be populated in order to use this method with sort or filter")
     }
 
-    let freeFacilities = [];
-    this.facilities.map((facility) => {
-        if (!facility.is_active) return;
-        let isFree = true;
-        // Facility shouldn't be present in any active craft process
-        this.craft_processes.some((craftProcess) => {
-            if (!craftProcess.is_finished && hasObjectId(craftProcess.crafting_facilities, facility._id)) {
-                return isFree = false;
-            }
-        });
-        if (isFree && filter instanceof Function) {
-            isFree = filter(facility);
+    const freeFacilities = this.facilities.map((facility) => {
+        if (this.facilityIsFree(facility, filter)) {
+            return facility;
         }
-        if (isFree) {
-            freeFacilities.push(facility);
-        }
-    });
+    }).filter(facility => facility !== undefined);
 
     let direction;
     switch (sortDirection.toUpperCase()) {
@@ -480,83 +460,63 @@ BuildingSchema.methods.freeFacilities = function(filter, sortBy, sortDirection =
     return freeFacilities;
 };
 
-// todo: use async-await
-BuildingSchema.methods.addFacility = function(facilityId, isActive = true) {
-    return new Promise((resolve, reject) => {
-        model("Facility").findById(facilityId).then((facility) => {
-            if (!facility) reject("Unable to find specified facility entity");
+BuildingSchema.methods.addFacility = async function(facilityId, isActive = true) {
+    const facility = await model("Facility").findById(facilityId);
+    if (!facility) throw new ErrorResponse("Unable to find specified facility");
 
-            const newFacilityEntity = {
-                _id: Types.ObjectId(),
-                facility_id: facilityId,
-                is_active: false
-            };
+    const newFacilityEntity = {
+        _id: Types.ObjectId(),
+        facility_id: facilityId,
+        is_active: false
+    };
 
-            if (isActive) {
-                // Check whether fraction/building has enough of energy
-                this.hasEnergy(facility.energy_consumption, false, false).then((hasEnergy) => {
-                    newFacilityEntity.is_active = hasEnergy;
-                    this.facilities.push(newFacilityEntity);
-                    this.save().then(() => resolve(newFacilityEntity._id));
-                });
-            } else {
-                this.facilities.push(newFacilityEntity);
-                this.save().then(() => resolve(newFacilityEntity._id));
-            }
-        })
-    })
+    if (isActive) {
+        // Check whether fraction/building has enough of energy
+        newFacilityEntity.is_active = await this.hasEnergy(facility.energy_consumption, false, false)
+    }
+
+    this.facilities.push(newFacilityEntity);
+    this.save();
+    return newFacilityEntity._id;
 };
 
 BuildingSchema.methods.enableFacility = async function(facilityEntityId) {
-    return new Promise((resolve, reject) => {
-        const facilityEntity = this.facilities.id(facilityEntityId);
-        if (!facilityEntity) reject("Unable to find specified facility entity");
-        if (facilityEntity.is_active === true) resolve(true);
+    const facilityEntity = this.facilities.id(facilityEntityId);
+    if (!facilityEntity) throw new ErrorResponse("Unable to find specified facility entity");
+    if (facilityEntity.is_active === true) return true;
 
-        this.populateFacilities().then(() => {
-            this.hasEnergy(facilityEntity.properties.energy_consumption).then(() => {
-                facilityEntity.is_active = true;
-                this.save().then(() => resolve(true));
-            })
-        })
-    });
+    await this.populateFacilities();
+    await this.hasEnergy(facilityEntity.properties.energy_consumption);
+    facilityEntity.is_active = true;
+    await this.save();
+    return true;
 };
 
-// todo: use async-await
-BuildingSchema.methods.disableFacility = function(facilityEntityId) {
-    return new Promise((resolve, reject) => {
-        const facilityEntity = this.facilities.id(facilityEntityId);
-        if (!facilityEntity) reject("Unable to find specified facility entity");
-        if (facilityEntity.is_active === false) resolve(true);
+BuildingSchema.methods.disableFacility = async function(facilityEntityId) {
+    const facilityEntity = this.facilities.id(facilityEntityId);
+    if (!facilityEntity) throw new ErrorResponse("Unable to find specified facility entity");
+    if (facilityEntity.is_active === false) return true;
 
-        const isFree = this.freeFacilities.some((freeFacility) => {
-            return freeFacility._id.equals(facilityEntityId)
-        });
-        if (!isFree) {
-            reject("Facility cannot be disabled. It's currently used in craft process")
-        } else {
-            facilityEntity.is_active = false;
-            this.save().then(() => resolve(true));
-        }
-    });
+    if (!this.facilityIsFree(facilityEntity)) {
+        throw new ErrorResponse(`Facility ${facilityEntityId} cannot be disabled. It's currently used in craft process`);
+    }
+
+    facilityEntity.is_active = false;
+    await this.save();
+    return true
 };
 
-// todo: use async-await
-BuildingSchema.methods.removeFacility = function(facilityEntityId) {
-    return new Promise((resolve, reject) => {
-        const facilityEntity = this.facilities.id(facilityEntityId);
-        if (!facilityEntity) reject("Unable to find specified facility entity");
+BuildingSchema.methods.removeFacility = async function(facilityEntityId) {
+    const facilityEntity = this.facilities.id(facilityEntityId);
+    if (!facilityEntity) throw new ErrorResponse("Unable to find specified facility entity");
 
-        const isFree = this.freeFacilities.some((freeFacility) => {
-            return freeFacility._id.equals(facilityEntityId)
-        });
-        if (!isFree) {
-            reject("Facility cannot be removed. It's currently used in craft process")
-        } else {
-            facilityEntity.remove();
-            this.save().then(() => resolve(true));
-        }
-    });
+    if (!this.facilityIsFree(facilityEntity)) {
+        throw new ErrorResponse(`Facility ${facilityEntityId} cannot be removed. It's currently used in craft process`);
+    }
+
+    facilityEntity.remove();
+    await this.save();
+    return true;
 };
 
 //endregion
@@ -591,7 +551,7 @@ BuildingSchema.methods.addConsumption = function (resource_id, amount, chance, a
 };
 
 BuildingSchema.methods.removeConsumption = function (turnoverId, autoSave = true) {
-    const turnover = this.produces.id(turnoverId);
+    const turnover = this.consumes.id(turnoverId);
     if (!turnover) {
         throw new ErrorResponse("Can't find specified turnover")
     }

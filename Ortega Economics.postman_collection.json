@@ -1,0 +1,3271 @@
+{
+	"info": {
+		"_postman_id": "017bc4e0-f023-4754-8046-22be870c5637",
+		"name": "Ortega Economics",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Admin - Disabled",
+			"item": [
+				{
+					"name": "Models",
+					"item": [
+						{
+							"name": "Blueprints",
+							"item": [
+								{
+									"name": "Get blueprints",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/blueprints",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprints"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create blueprint",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"Unnamed\",\n    \"item_id\": 1,\n    \"time_multiplier\": 1,\n    \"required_resources\": [],\n    \"required_facilities\": [],\n    \"required_perks\": []\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/blueprints",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprints"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete blueprint",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/blueprints/{{blueprint_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprints",
+												"{{blueprint_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update blueprint",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"Unnamed\",\n    \"item_id\": 1,\n    \"time_multiplier\": 1,\n    \"required_resources\": [],\n    \"required_facilities\": [],\n    \"required_perks\": []\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/blueprints/{{blueprint_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprints",
+												"{{blueprint_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Recipes",
+							"item": [
+								{
+									"name": "Get recipes",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/recipes",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"recipes"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create recipe",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"Unnamed\",\n    \"item_id\": 1,\n    \"resource_id\": \"\",\n    \"required_resources\": [],\n    \"required_facility\": \"\",\n    \"craft_time\": 0\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/recipes",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"recipes"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete recipe",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/recipes/{{recipe_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"recipes",
+												"{{recipe_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update recipe",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"Unnamed\",\n    \"item_id\": 1,\n    \"resource_id\": \"\",\n    \"required_resources\": [],\n    \"required_facilities\": [],\n    \"craft_time\": 0\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/recipes/{{recipe_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"recipes",
+												"{{recipe_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Blueprint Entities",
+							"item": [
+								{
+									"name": "Get blueprint entities",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/blueprint-entities",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprint-entities"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create blueprint entity",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"blueprint_id\": null,\n    \"quality\": 0\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/blueprint-entities",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprint-entities"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete blueprint entity",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/blueprint-entities/{{blueprint_entity_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprint-entities",
+												"{{blueprint_entity_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update blueprint entity",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"blueprint_id\": null,\n    \"quality\": 0\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/blueprint-entities/{{blueprint_entity_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"blueprint-entities",
+												"{{blueprint_entity_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Buildings",
+							"item": [
+								{
+									"name": "Get buildings",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/buildings",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"buildings"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create building",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"fraction_id\": null,\n\t\"name\": \"Unnamed\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"resources\": {},\n\t\"facilities\": [],\n\t\"is_active\": false,\n\t\"production_priority\": 0,\n    \"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/buildings",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"buildings"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete building",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/buildings/{{building_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"buildings",
+												"{{building_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update building",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"fraction_id\": null,\n\t\"name\": \"Unnamed\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"resources\": {},\n\t\"facilities\": [],\n\t\"is_active\": false,\n\t\"production_priority\": 0,\n    \"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/buildings/{{building_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"buildings",
+												"{{building_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Facilities",
+							"item": [
+								{
+									"name": "Get facilities",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/facilities",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"facilities"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create facility",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"Forge\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/facilities",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"facilities"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete facility",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/facilities/{{facillity_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"facilities",
+												"{{facillity_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update facility",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/facilities/{{facillity_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"facilities",
+												"{{facillity_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Fractions",
+							"item": [
+								{
+									"name": "Get fractions",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/fractions",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"fractions"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create fraction",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\",\n\t\"squads\": [],\n\t\"traits\": []\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/fractions",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"fractions"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete fraction",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/fractions/{{fraction_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"fractions",
+												"{{fraction_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update fraction",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\",\n\t\"squads\": [],\n\t\"traits\": []\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/fractions/{{fraction_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"fractions",
+												"{{fraction_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Perks",
+							"item": [
+								{
+									"name": "Get perks",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/perks",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"perks"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create perk",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/perks",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"perks"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete perk",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/perks/{{perk_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"perks",
+												"{{perk_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update perk",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/perks/{{perk_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"perks",
+												"{{perk_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Characters",
+							"item": [
+								{
+									"name": "Get characters",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/characters",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"characters"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create character",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\",\n\t\"fraction_id\": \"\",\n\t\"perks\": []\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/characters",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"characters"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete character",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/characters/{{character_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"characters",
+												"{{character_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update character",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\",\n\t\"fraction_id\": \"\",\n\t\"perks\": []\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/characters/{{character_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"characters",
+												"{{character_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Resources",
+							"item": [
+								{
+									"name": "Get resources",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/resources",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"resources"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create resource",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/resources",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"resources"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete resource",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/resources/{{resource_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"resources",
+												"{{resource_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Rename resource",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/resources/{{resource_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"resources",
+												"{{resource_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Traits",
+							"item": [
+								{
+									"name": "Get traits",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/traits",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"traits"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create trait",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/traits",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"traits"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete trait",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{server_url}}/admin/traits/{{trait_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"traits",
+												"{{trait_id}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Rename trait",
+									"request": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"name\": \"\"\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/traits/{{trait_id}}",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"traits",
+												"{{trait_id}}"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "a0583440-d729-478e-9e51-c5037ba5dcdc",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "2dc6eea3-ab69-43bf-805c-ed2670d22c52",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Jobs",
+					"item": [
+						{
+							"name": "Craft",
+							"item": [
+								{
+									"name": "Finish craft process",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"craft_process_id\": null\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/craft/{{building_id}}/craft/finish",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"craft",
+												"{{building_id}}",
+												"craft",
+												"finish"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Cancel craft process",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"craft_process_id\": null\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/admin/craft/{{building_id}}/craft/cancel",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"admin",
+												"craft",
+												"{{building_id}}",
+												"craft",
+												"cancel"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Force production cycle",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/admin/jobs/force-production-cycle",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"admin",
+										"jobs",
+										"force-production-cycle"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4f268c69-48e0-40ae-91f2-a98603f94271",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e62269f2-616e-4426-94f5-972f4d94315d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Models - Deprecated",
+			"item": [
+				{
+					"name": "Buildings",
+					"item": [
+						{
+							"name": "Craft",
+							"item": [
+								{
+									"name": "Craft by blueprint",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"character_id\": null,\n    \"blueprint_entity_id\": null,\n    \"participants\": [],\n    \"resources_multiplier\": 1\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/buildings/{{building_id}}/craft/by-blueprint",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"buildings",
+												"{{building_id}}",
+												"craft",
+												"by-blueprint"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Craft by recipe",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"character_id\": null,\n    \"recipe_id\": null,\n    \"quantity\": 1\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/buildings/{{building_id}}/craft/by-recipe",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"buildings",
+												"{{building_id}}",
+												"craft",
+												"by-recipe"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Finish craft process",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"character_id\": null,\n    \"craft_process_id\": null\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/buildings/{{building_id}}/craft/finish",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"buildings",
+												"{{building_id}}",
+												"craft",
+												"finish"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Cancel craft process",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"character_id\": null,\n    \"craft_process_id\": null\n}"
+										},
+										"url": {
+											"raw": "{{server_url}}/buildings/{{building_id}}/craft/cancel",
+											"host": [
+												"{{server_url}}"
+											],
+											"path": [
+												"buildings",
+												"{{building_id}}",
+												"craft",
+												"cancel"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Get buildings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/buildings",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Activate building",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/buildings/{{building_id}}/activate",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings",
+										"{{building_id}}",
+										"activate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deactivate building",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/buildings/{{building_id}}/deactivate",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings",
+										"{{building_id}}",
+										"deactivate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Change resources in building",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"resources\": [\n\t\t{\n\t\t\t\"_id\": null,\n\t\t\t\"amount\": 0\n\t\t}\n\t],\n\t\"strictCheck\": true\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/buildings/{{building_id}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings",
+										"{{building_id}}",
+										"resources"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add resource consumption",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"_id\": null,\n\t\"amount\": 0,\n\t\"chance\": 0.0\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/buildings/{{building_id}}/consumption",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings",
+										"{{building_id}}",
+										"consumption"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add resource production",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"_id\": null,\n\t\"amount\": 0,\n\t\"chance\": 0.0\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/buildings/{{building_id}}/production",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings",
+										"{{building_id}}",
+										"production"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove resource production",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/buildings/{{building_id}}/production/{{turnover_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings",
+										"{{building_id}}",
+										"production",
+										"{{turnover_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove resource consumption",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/buildings/{{building_id}}/consumption/{{turnover_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"buildings",
+										"{{building_id}}",
+										"consumption",
+										"{{turnover_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Fractions",
+					"item": [
+						{
+							"name": "Get fractions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/fractions",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"fractions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all fraction resources",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/fractions/{{fraction_id}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"fractions",
+										"{{fraction_id}}",
+										"resources"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all fraction buildings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/fractions/{{fraction_id}}/buildings",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"fractions",
+										"{{fraction_id}}",
+										"buildings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all fraction members",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/fractions/{{fraction_id}}/members",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"fractions",
+										"{{fraction_id}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get overall storage info of all buildings of faction",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/fractions/{{fraction_id}}/storage",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"fractions",
+										"{{fraction_id}}",
+										"storage"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Change resources in fraction buldings",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"resources\": [\n\t\t{\n\t\t\t\"_id\": null,\n\t\t\t\"amount\": 0\n\t\t}\n\t],\n\t\"strictCheck\": true\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/fractions/{{fraction_id}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"fractions",
+										"{{fraction_id}}",
+										"resources"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Resources",
+					"item": [
+						{
+							"name": "Get all resource types",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"resources"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7877a9fe-ed74-4936-ab9d-80f8138247ac",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1fc58c58-597c-4bd6-b99b-6f39bc6af91b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Server",
+			"item": [
+				{
+					"name": "Fractions",
+					"item": [
+						{
+							"name": "Get list of fractions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/fractions",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get fraction info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create fraction",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{fraction_name}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/fractions",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update fraction",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{fraction_name}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "(UNSAFE) Delete fraction",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add trait to fraction",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"trait_id\": \"{{trait_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}/traits",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}",
+										"traits"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove trait from fraction",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"trait_id\": \"{{trait_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}/traits",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}",
+										"traits"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get list of fraction buildings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}/buildings",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}",
+										"buildings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get list of fraction resources",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}",
+										"resources"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get list of fraction members",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}/members",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get list of free fraction members",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/fractions/{{fraction_id}}/free-members",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"fractions",
+										"{{fraction_id}}",
+										"free-members"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Traits",
+					"item": [
+						{
+							"name": "Get list of traits",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/traits",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"traits"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Buildings",
+					"item": [
+						{
+							"name": "Get list of buildings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get building info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create building",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"energy_production\": 0,\n\t\"production_priority\": 0,\n\t\"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update building",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"energy_production\": 0,\n\t\"production_priority\": 0,\n\t\"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete building",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check whether characher has access to building",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/has-access",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"has-access"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Attach building to the fraction",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"fraction_id\": \"\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/fraction",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"fraction"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Attach building to the character",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"character_id\": \"\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/character",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"character"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Detach building from character/fraction",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/owner",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"owner"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add resources production to the building",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"resource_id\": \"\",\n\t\"amount\": 0,\n\t\"chance\": 0\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/production",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"production"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove resources production from the building",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/production/{{production_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"production",
+										"{{production_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add resources consumption to the building",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"resource_id\": \"\",\n\t\"amount\": 0,\n\t\"chance\": 0\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/consumption",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"consumption"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove resources consumption from the building",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/consumption/{{consumption_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"consumption",
+										"{{consumption_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Increase/decrease amount of resources in the building",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"resources\": [\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"resources"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Increase/decrease amount of specific resource in the building",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"resources\": [\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/resource",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"resource"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Enable the building",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/enable",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"enable"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Disable the building",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/disable",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"disable"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add facility to the building",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"facility_id\": \"\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/facilities",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"facilities"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove facility from the building",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/facility/{{facility_entity_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"facility",
+										"{{facility_entity_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Facilities",
+					"item": [
+						{
+							"name": "Get list of facilities",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/facilities",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"facilities"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Characters",
+					"item": [
+						{
+							"name": "Get list of characters",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/characters",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get character info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create character",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{character_name}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/characters",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update character",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{character_name}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "(UNSAFE) Delete character",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add perk to character",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"perk_id\": \"{{perk_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}/perks",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}",
+										"perks"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove perk from character",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"perk_id\": \"{{perk_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}/perks",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}",
+										"perks"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get list of personal buildings of character",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}/buildings",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}",
+										"buildings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get list of personal resouces of character",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}",
+										"resources"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get fraction of character",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}/fraction",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}",
+										"fraction"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Attach character to fraction",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"fraction_id\": \"{{fraction_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}/fraction",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}",
+										"fraction"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Detach character from fraction",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/characters/{{character_id}}/fraction",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"characters",
+										"{{character_id}}",
+										"fraction"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Perks",
+					"item": [
+						{
+							"name": "Get list of perks",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/perks",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"perks"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Recipes",
+					"item": [
+						{
+							"name": "Get all recipes",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"quality\": 1\n}"
+								},
+								"url": {
+									"raw": "{{server_url}}/server/recipes/",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"recipes",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get recipe info by id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{server_url}}/server/recipes/{{recipe_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"recipes",
+										"{{recipe_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Blueprints",
+					"item": [
+						{
+							"name": "Get all blueprints or entities",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"entities\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server_url}}/server/blueprints/",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"blueprints",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get blueprint info by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"blueprints",
+										"{{blueprint_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get blueprint entity info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/{{entity_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"blueprints",
+										"{{blueprint_id}}",
+										"{{entity_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create blueprint entity",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"quality\": {{quality}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"blueprints",
+										"{{blueprint_id}}",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit blueprint entity quality by ID",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"quality\": {{quality}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/{{entity_id}}/",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"blueprints",
+										"{{blueprint_id}}",
+										"{{entity_id}}",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete blueprint entity",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/{{entity_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"blueprints",
+										"{{blueprint_id}}",
+										"{{entity_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7877a9fe-ed74-4936-ab9d-80f8138247ac",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1fc58c58-597c-4bd6-b99b-6f39bc6af91b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

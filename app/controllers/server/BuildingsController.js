@@ -1,7 +1,7 @@
 // Controller foundation
 const ServerController = require("../ServerController");
 const { wrap } = require("../Controller");
-const { check, body } = require('express-validator');
+const { query, body } = require('express-validator');
 // Database
 const { model } = require("mongoose");
 
@@ -110,17 +110,17 @@ class BuildingsController extends ServerController {
 
         // Check whether character has access to building
         this.router.get("/:building_id/has-access", [
-            check("character_id").isString().exists({ checkFalsy: true })
+            query("character_id").isString().exists({ checkFalsy: true })
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
             const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
-            const character = await model("Character").findById(request.params.character_id);
+            const character = await model("Character").findById(request.query.character_id);
             if (!character) response.status(400).send("Character not found");
 
-            return response.status(200).send(building.characterHasAccess(character));
+            return response.status(200).send(building.characterHasAccess(character, false));
         }));
 
         // Attach building to the fraction
@@ -154,7 +154,7 @@ class BuildingsController extends ServerController {
         }));
 
         // Detach building from character/fraction
-        this.router.delete(/\/:building_id\/(owner|fraction|character)/, wrap(async (request, response, next) => {
+        this.router.delete("/:building_id/owner", wrap(async (request, response, next) => {
             const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
@@ -216,7 +216,7 @@ class BuildingsController extends ServerController {
             const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
-            await building.removeConsumption(request.params.production_id);
+            await building.removeConsumption(request.params.consumption_id);
             return response.status(200).send(true);
         }));
 

@@ -1,7 +1,7 @@
 // Scheduler
-const scheduler = require("node-schedule")
+const scheduler = require("node-schedule");
 // Jobs
-const Production = require("./Production")
+const Production = require("./Production");
 
 /*
 *    *    *    *    *    *
@@ -16,4 +16,4 @@ const Production = require("./Production")
  */
 
 // todo: execute every 7 days
-// scheduler.scheduleJob("5 * * * * *", Production.handleFractions)
+// scheduler.scheduleJob("5 * * * * *", Production.handleAllBuildings)
