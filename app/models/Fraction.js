@@ -2,10 +2,12 @@
 const { Schema, model } = require("mongoose");
 const Int32 = require("mongoose-int32");
 // Helpers
-const { mergeResources, sortResources } = require("../helpers/ResourcesHelper");
+const { mergeResources, sortResources, filterWithNegativeAmount } = require("../helpers/ResourcesHelper");
 const { sortByStoragePriority } = require("../helpers/BuildingsHelper");
 // Validators
 const { exists } = require("../validators/General");
+// Exception
+const ErrorResponse = require("@controllers/ErrorResponse");
 
 const SquadSchema = new Schema({
     name: {
@@ -57,17 +59,11 @@ const FractionSchema = new Schema({
 
 FractionSchema.methods.hasResources = async function(resourcesToFind, throwException = true) {
     const fractionResources = await this.resources;
-    try {
-        resourcesToFind.map((resourceToFind) => {
-            if (Math.abs(resourceToFind.amount) > fractionResources[resourceToFind._id]) {
-                throw new Error("Fraction doesn't have enough of resources");
-            }
-        })
-    } catch (e) {
-        if (throwException) throw e;
-        return false
-    }
-    return true
+    const result = resourcesToFind.every((resourceToFind) => {
+        return Math.abs(resourceToFind.amount) <= fractionResources[resourceToFind._id.toString()]
+    });
+    if (!result && throwException) throw new ErrorResponse("Fraction doesn't have enough of resources");
+    return result;
 };
 
 FractionSchema.methods.hasEnergy = function(amountOfEnergy, doBlackoutOnFalse = false, rejectOnFalse = true) {
@@ -91,30 +87,16 @@ FractionSchema.methods.hasEnergy = function(amountOfEnergy, doBlackoutOnFalse = 
 };
 
 FractionSchema.methods.editResources = async function(resources, strictCheck = true) {
-    // todo: Try to use transactions (replica sets are required)
-    const storageInfo = await this.storage;
-    let resourcesToAdd = sortResources(mergeResources(resources));
-    let neededStorageSize = 0;
-
-    // Count overall amount of resources
-    resources.map((resource) => {
-        neededStorageSize += resource.amount;
-    });
-
-    // Storage mustn't be overflowed
-    if (neededStorageSize + storageInfo.used_storage > storageInfo.storage_size) {
-        throw new Error(`Storage will be overflowed (new: ${neededStorageSize + storageInfo.used_storage} > max: ${storageInfo.storage_size})`);
-    }
+    const transaction = sortResources(mergeResources(resources));
+    this.hasResources(filterWithNegativeAmount(transaction));
 
     const buildings = sortByStoragePriority(await this.buildings);
-    resourcesToAdd.forEach((resource, key, resources) => {
+    transaction.forEach((resource, key, resources) => {
         for (const building of buildings) {
-            if (resources[key].amount === 0) {
-                break;
-            }
+            if (resources[key].amount === 0) break;
             const resourceId = resource._id.toString();
 
-            // Add and subtract operations must be processed differently
+            // Add
             if (resource.amount >= 0) {
                 // Check whether there's enough of space in building
                 if (building.used_storage === building.storage_size) continue;
@@ -137,11 +119,11 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
                 } else {
                     building.resources.set(resourceId, amountToAdd);
                 }
-            } else {
+            }
+            // Subtract
+            else {
                 // Check whether building has such resource
-                if (!building.resources.has(resourceId)) {
-                    continue;
-                }
+                if (!building.resources.has(resourceId)) continue;
 
                 // Subtract possible amount of resource from storage and used storage size
                 const difference = building.resources.get(resourceId) + resource.amount;
@@ -163,27 +145,21 @@ FractionSchema.methods.editResources = async function(resources, strictCheck = t
 
     // Check whether all resources was successfully added or subtracted
     if (strictCheck) {
-        resourcesToAdd.map((resource) => {
+        transaction.map((resource) => {
             if (resource.amount !== 0) {
-                throw new Error("Not enough of storage space or resources to remove");
+                throw new ErrorResponse("Not enough of storage space or resources to remove");
             }
         })
     }
 
-    // Used storage size cannot be negative
-    if (neededStorageSize + storageInfo.used_storage < 0) {
-        throw new Error("Used storage size cannot be negative");
-    }
-
-    // Commit changes
-    // todo: log changes
-    await buildings.map(async (building) => {
-        await building.save();
-    })
+    await Promise.all(buildings.map((building) => {
+        return building.save()
+    }));
+    return true;
 };
 
-FractionSchema.methods.editResource = async function(resource, strictCheck = true) {
-    this.editResources([resource], strictCheck);
+FractionSchema.methods.editResource = function(resource, strictCheck = true) {
+    return this.editResources([resource], strictCheck);
 };
 
 // Disable all facilities of fraction

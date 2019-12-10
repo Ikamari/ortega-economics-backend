@@ -15,6 +15,10 @@ const mergeResources = (...resourcesArrays) => {
     return Object.values(merged)
 };
 
+const filterWithNegativeAmount = (resources) => {
+    return resources.filter((resource) => resource.amount < 0)
+};
+
 const sortResources = (resources, direction = "asc") => {
     const dir = direction === "asc" ? 1 : -1;
     return resources.sort((a, b) =>
@@ -41,3 +45,4 @@ module.exports.sortResources   = sortResources;
 module.exports.mergeResources  = mergeResources;
 module.exports.invertResources = invertResources;
 module.exports.countResources  = countResources;
+module.exports.filterWithNegativeAmount = filterWithNegativeAmount;

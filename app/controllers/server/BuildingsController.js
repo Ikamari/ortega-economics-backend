@@ -220,7 +220,10 @@ class BuildingsController extends ServerController {
             const building = await model("Building").findById(request.params.building_id);
             if (!building) return response.status(404).send("Not found");
 
-            await building.editResources(request.body.resources);
+            await building.editResources(
+                request.body.resources,
+                request.query.strict ? request.query.strict === "true" : true
+            );
             return response.status(200).send(true);
         }));
 
@@ -237,7 +240,7 @@ class BuildingsController extends ServerController {
             await building.editResource({
                 _id:    request.body.resource_id,
                 amount: request.body.amount
-            });
+            }, request.query.strict ? request.query.strict === "true" : true);
             return response.status(200).send(true);
         }));
 
