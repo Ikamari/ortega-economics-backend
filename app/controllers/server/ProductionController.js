@@ -32,7 +32,7 @@ class ProductionController extends ServerController {
         }));
 
         this.router.get("/force-production-cycle", wrap(async(request, response, next) => {
-            Production.handleFractions(false)
+            Production.handleAllBuildings(false)
                 .then(() => response.status(200).send("Ok!"))
                 .catch(error => next(error));
         }));

@@ -5,7 +5,7 @@ const { mergeResources } = require("../helpers/ResourcesHelper");
 // Exception
 const ErrorResponse = require("@controllers/ErrorResponse");
 
-const handleBuilding = async (building) => {
+const handleBuilding = async (building, waterID, foodID) => {
     if (!building.is_active) {
         throw new ErrorResponse("Specified building is inactive");
     }
@@ -15,6 +15,7 @@ const handleBuilding = async (building) => {
 
     // Count how much resources will be consumed by the building
     let resourcesToConsume = {};
+    let moneyToConsume;
     building.consumes.map((turnover) => {
         // Roll the dice to check whether specific resource should be consumed
         if (Math.random() > turnover.chance) return;
@@ -26,11 +27,21 @@ const handleBuilding = async (building) => {
                 amount: -turnover.amount
             };
         }
+        resourcesToConsume[waterID] = {
+            _id: waterID,
+            amount: -(building.workers_consumption.water * building.used_workplaces)
+        };
+        resourcesToConsume[foodID] = {
+            _id: foodID,
+            amount: -(building.workers_consumption.food * building.used_workplaces)
+        };
+        moneyToConsume = -(building.workers_consumption.money);
     });
     resourcesToConsume = Object.values(resourcesToConsume);
 
     // Count how much resources will be produced by the building
     let resourcesToProduce = {};
+    let moneyToProduce;
     building.produces.map((turnover) => {
         // Roll the dice to check whether specific resource should be produced
         if (Math.random() > turnover.chance) return;
@@ -41,17 +52,29 @@ const handleBuilding = async (building) => {
                 _id: turnover.resource_id,
                 amount: turnover.amount
             };
-        }
+        };
+        moneyToProduce = building.money_production;
     });
     resourcesToProduce = Object.values(resourcesToProduce);
+    building.money -= moneyToConsume+moneyToConsume;
 
     // Remove resources from fraction and add as much as possible resources to the building
     await building.editResources(mergeResources(resourcesToProduce, resourcesToConsume), false);
+    
 };
 
-const handleBuildings = (buildings, throwException = false) => {
-    return Promise.all(buildings.map((building) => {
-        return handleBuilding(building)
+const handleBuildings = (buildings, throwException = false) => {   
+    return Promise.all(buildings.map((async(building) => {
+        let waterID, foodID;
+        await model("Resource").findOne({ name: "Вода" }), async function (err, resource) {
+            err(new ErrorResponse("The building doesn't have enough water"));
+            waterID = resource._id;
+        };
+        await model("Resource").findOne({ name: "Пища" }), async function (err, resource) {
+            err(new ErrorResponse("The building doesn't have enough food"));
+            foodID = resource._id;
+        };
+        return handleBuilding(building, waterID, foodID)
             .then(() => {
                 console.log(`Successfully finished production cycle for building ${building._id}`);
             })
@@ -59,7 +82,7 @@ const handleBuildings = (buildings, throwException = false) => {
                 console.log(`Failed to finish production cycle for building ${building._id}: ${e.message}`);
                 if (throwException) throw e;
             });
-    }));
+    })));
 };
 
 const handleCharacter = async (characterId, throwException = false) => {

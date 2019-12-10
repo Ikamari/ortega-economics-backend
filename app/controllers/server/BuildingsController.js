@@ -69,7 +69,10 @@ class BuildingsController extends ServerController {
             body("defense_level").isInt({ min: 0 }).optional(),
             body("money_production").isInt().optional(),
             body("workers_count").isInt({ min: 0 }).optional(),
-            body("phantom_workers_count").isInt({ min: 0 }).optional()
+            body("phantom_workers_count").isInt({ min: 0 }).optional(),
+            body("workers_food_consumption").isInt({ min: 0 }).optional(),
+            body("workers_water_consumption").isInt({ min: 0 }).optional(),
+            body("workers_money_consumption").isInt({ min: 0 }).optional()
         ],  wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
@@ -92,6 +95,7 @@ class BuildingsController extends ServerController {
             this.updateIfDefined(building, "money_production", request.body.money_production);
             this.updateIfDefined(building, "used_workplaces", request.body.workers_count);
             this.updateIfDefined(building, "used_workplaces_by_phantoms", request.body.phantom_workers_count);
+            this.updateIfDefined(building, "workers_consumption", { food: request.body.workers_food_consumption, water: request.body.workers_water_consumption, money: request.body.workers_money_consumption })
             await building.save();
 
             return response.status(200).send(building);
