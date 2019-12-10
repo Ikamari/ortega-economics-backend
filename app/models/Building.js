@@ -2,7 +2,7 @@
 const { Schema, Types, model } = require("mongoose");
 const Int32 = require("mongoose-int32");
 // Helpers
-const { mergeResources, sortResources, invertResources } = require("../helpers/ResourcesHelper");
+const { mergeResources, sortResources, invertResources, filterWithNegativeAmount } = require("../helpers/ResourcesHelper");
 const { hasObjectId } = require("../helpers/ObjectIdHelper");
 const moment = require("moment");
 // Validators
@@ -342,44 +342,31 @@ BuildingSchema.methods.detachFromOwner = async function() {
 //region - Resources
 
 BuildingSchema.methods.hasResources = function(resourcesToFind, throwException = true) {
-    try {
-        resourcesToFind.map((resourceToFind) => {
-            if (Math.abs(resourceToFind.amount) > this.resources.get(resourceToFind._id.toString())) {
-                throw new Error("Building doesn't have enough of resources");
-            }
-        })
-    } catch (e) {
-        if (throwException) throw e;
-        return false
-    }
-    return true
+    const result = resourcesToFind.every((resourceToFind) => {
+        return Math.abs(resourceToFind.amount) <= this.resources.get(resourceToFind._id.toString())
+    });
+    if (!result && throwException) throw new ErrorResponse("Building doesn't have enough of resources");
+    return result;
 };
 
 BuildingSchema.methods.editResources = async function(resources, strictCheck = true, autoSave = true) {
-    resources = sortResources(mergeResources(resources));
-    this.hasResources(resources.map((resource) => {
-        if (resource.amount < 0) return resource;
-    }).filter(resource => resource !== undefined));
+    const transaction = sortResources(mergeResources(resources));
+    this.hasResources(filterWithNegativeAmount(transaction));
     let newUsedStorage = this.used_storage;
 
     // Add or remove specified resources
-    resources.map((resource) => {
-        // Skip iteration if storage is fully filled
-        if (resource.amount >= 0 && newUsedStorage >= this.storage_size) return;
+    transaction.map((resource) => {
         const resourceId = resource._id.toString();
 
-        let newAmount = 0;
         if (this.resources.has(resourceId)) {
-            newAmount = this.resources.get(resourceId) + resource.amount;
-            this.resources.set(resourceId, newAmount)
+            this.resources.set(resourceId, this.resources.get(resourceId) + resource.amount)
         } else {
-            newAmount = resource.amount;
-            this.resources.set(resourceId, newAmount)
+            this.resources.set(resourceId, resource.amount)
         }
         newUsedStorage += resource.amount;
 
         // If storage got overflowed and strict check is disabled, subtract part of resources to fit storage size
-        if (newUsedStorage > this.storage_size && !strictCheck) {
+        if ((newUsedStorage > this.storage_size) && !strictCheck) {
             const amountToSubtract = newUsedStorage - this.storage_size;
             this.resources.set(resourceId, this.resources.get(resourceId) - amountToSubtract);
             newUsedStorage -= amountToSubtract
@@ -388,7 +375,7 @@ BuildingSchema.methods.editResources = async function(resources, strictCheck = t
 
     // Storage mustn't be overflowed
     if (newUsedStorage > this.storage_size) {
-        throw new Error(`Storage will be overflowed (new: ${newUsedStorage} > max: ${this.storage_size})`);
+        throw new ErrorResponse(`Storage will be overflowed (new: ${newUsedStorage}, max: ${this.storage_size})`);
     }
 
     // Used storage size cannot be negative
@@ -404,8 +391,8 @@ BuildingSchema.methods.editResources = async function(resources, strictCheck = t
 };
 
 // todo: add and use autosave parameter
-BuildingSchema.methods.editResource = function(resource, strictCheck = true) {
-    return this.editResources([resource], strictCheck)
+BuildingSchema.methods.editResource = function(resource, strictCheck = true, autoSave = true) {
+    return this.editResources([resource], strictCheck, autoSave)
 };
 
 //endregion

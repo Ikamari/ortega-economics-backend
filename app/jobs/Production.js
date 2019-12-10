@@ -7,10 +7,10 @@ const ErrorResponse = require("@controllers/ErrorResponse");
 
 const handleBuilding = async (building, waterID, foodID) => {
     if (!building.is_active) {
-        throw new ErrorResponse("Specified building is inactive");
+        throw new ErrorResponse("Building is not active");
     }
     if (building.used_storage >= building.storage_size) {
-        throw new ErrorResponse("Specified building doesn't have any space in storage", 500);
+        throw new ErrorResponse("Building doesn't have any space in storage");
     }
 
     // Count how much resources will be consumed by the building
