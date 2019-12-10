@@ -12,68 +12,79 @@ const handleBuilding = async (building, waterID, foodID) => {
     if (building.used_storage >= building.storage_size) {
         throw new ErrorResponse("Building doesn't have any space in storage");
     }
+    building.workers_consumption.map((consumption) => {
+        if(consumption.money * building.used_workplaces > building.money) {
+            throw new ErrorResponse("Building doesn't have enough money");
+        }
+    });
+
+    // Calculate building efficiency
+    const efficiency = ((building.used_workplaces + building.used_workplaces_by_phantoms) / building.available_workplaces);
 
     // Count how much resources will be consumed by the building
     let resourcesToConsume = {};
-    let moneyToConsume;
     building.consumes.map((turnover) => {
         // Roll the dice to check whether specific resource should be consumed
         if (Math.random() > turnover.chance) return;
         if (turnover.resource_id in resourcesToConsume) {
-            resourcesToConsume[turnover.resource_id].amount -= turnover.amount;
+            resourcesToConsume[turnover.resource_id].amount -= Math.floor(turnover.amount * efficiency);
         } else {
             resourcesToConsume[turnover.resource_id] = {
                 _id: turnover.resource_id,
-                amount: -turnover.amount
+                amount: -Math.floor(turnover.amount * efficiency)
             };
         }
+    });
+    
+    // Count non-phantom workers' neccesity and money consumption
+    building.workers_consumption.map((consumption) => {
+        building.money += -(consumption.money * building.used_workplaces) + building.money_production;
+        
         resourcesToConsume[waterID] = {
             _id: waterID,
-            amount: -(building.workers_consumption.water * building.used_workplaces)
+            amount: -(consumption.water * building.used_workplaces)
         };
+
         resourcesToConsume[foodID] = {
             _id: foodID,
-            amount: -(building.workers_consumption.food * building.used_workplaces)
+            amount: -(consumption.food * building.used_workplaces)
         };
-        moneyToConsume = -(building.workers_consumption.money);
     });
+
     resourcesToConsume = Object.values(resourcesToConsume);
 
     // Count how much resources will be produced by the building
     let resourcesToProduce = {};
-    let moneyToProduce;
     building.produces.map((turnover) => {
         // Roll the dice to check whether specific resource should be produced
         if (Math.random() > turnover.chance) return;
         if (turnover.resource_id in resourcesToProduce) {
-            resourcesToProduce[turnover.resource_id].amount += turnover.amount;
+            resourcesToProduce[turnover.resource_id].amount += Math.floor(turnover.amount * efficiency);
         } else {
             resourcesToProduce[turnover.resource_id] = {
                 _id: turnover.resource_id,
-                amount: turnover.amount
+                amount: Math.floor(turnover.amount * efficiency)
             };
         };
-        moneyToProduce = building.money_production;
     });
     resourcesToProduce = Object.values(resourcesToProduce);
-    building.money -= moneyToConsume+moneyToConsume;
 
     // Remove resources from fraction and add as much as possible resources to the building
     await building.editResources(mergeResources(resourcesToProduce, resourcesToConsume), false);
     
 };
 
-const handleBuildings = (buildings, throwException = false) => {   
-    return Promise.all(buildings.map((async(building) => {
-        let waterID, foodID;
-        await model("Resource").findOne({ name: "Вода" }), async function (err, resource) {
-            err(new ErrorResponse("The building doesn't have enough water"));
-            waterID = resource._id;
-        };
-        await model("Resource").findOne({ name: "Пища" }), async function (err, resource) {
-            err(new ErrorResponse("The building doesn't have enough food"));
-            foodID = resource._id;
-        };
+const handleBuildings = async(buildings, throwException = false) => {   
+    let waterID, foodID;
+    const water = await model("Resource").findOne({ name: "Вода" });
+    const food = await model("Resource").findOne({ name: "Пища" });
+
+    if(water) waterID = water._id;
+    else new(Error("No water model."))
+    if(food) foodID = food._id;
+    else new(Error("No food model."))
+
+    return Promise.all(buildings.map(((building) => {
         return handleBuilding(building, waterID, foodID)
             .then(() => {
                 console.log(`Successfully finished production cycle for building ${building._id}`);

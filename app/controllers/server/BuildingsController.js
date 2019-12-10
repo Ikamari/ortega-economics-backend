@@ -34,6 +34,7 @@ class BuildingsController extends ServerController {
             body("storage_priority").isInt().optional(),
             body("defense_level").isInt({ min: 0 }).optional(),
             body("money_production").isInt().optional(), 
+            body("money").isInt({ min: 0 }).optional(),
             body("workers_count").isInt({ min: 0 }).optional(),
             body("phantom_workers_count").isInt({ min: 0 }).optional(),
             body("workers_food_consumption").isInt({ min: 0 }).optional(),
@@ -53,6 +54,7 @@ class BuildingsController extends ServerController {
                 storage_priority:            request.body.storage_priority,
                 defense_level:               request.body.defense_level,
                 money_production:            request.body.money_production,
+                money:                       request.body.money,
                 workers_consumption:         { food: request.body.workers_food_consumption, water: request.body.workers_water_consumption, money: request.body.workers_money_consumption }
             });
             return response.status(200).send(building);
@@ -68,6 +70,7 @@ class BuildingsController extends ServerController {
             body("storage_priority").isInt().optional(),
             body("defense_level").isInt({ min: 0 }).optional(),
             body("money_production").isInt().optional(),
+            body("money").isInt({ min: 0 }).optional(),
             body("workers_count").isInt({ min: 0 }).optional(),
             body("phantom_workers_count").isInt({ min: 0 }).optional(),
             body("workers_food_consumption").isInt({ min: 0 }).optional(),
@@ -93,11 +96,17 @@ class BuildingsController extends ServerController {
             this.updateIfDefined(building, "storage_priority", request.body.storage_priority);
             this.updateIfDefined(building, "defense_level", request.body.defense_level);
             this.updateIfDefined(building, "money_production", request.body.money_production);
+            this.updateIfDefined(building, "money", request.body.money);
             this.updateIfDefined(building, "used_workplaces", request.body.workers_count);
             this.updateIfDefined(building, "used_workplaces_by_phantoms", request.body.phantom_workers_count);
-            this.updateIfDefined(building, "workers_consumption", { food: request.body.workers_food_consumption, water: request.body.workers_water_consumption, money: request.body.workers_money_consumption })
-            await building.save();
+            
+            building.workers_consumption.map((consumption) => {
+                if(request.body.workers_food_consumption) consumption.food = request.body.workers_food_consumption;
+                if(request.body.workers_water_consumption) consumption.water = request.body.workers_water_consumption;
+                if(request.body.workers_money_consumption) consumption.money = request.body.workers_money_consumption;
+            })
 
+            await building.save();
             return response.status(200).send(building);
         }));
 
