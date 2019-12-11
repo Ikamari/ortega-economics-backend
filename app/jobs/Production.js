@@ -13,7 +13,7 @@ const handleBuilding = async (building, waterID, foodID) => {
         throw new ErrorResponse("Building doesn't have any space in storage");
     }
     building.workers_consumption.map((consumption) => {
-        if(consumption.money * building.used_workplaces > building.money) {
+        if(consumption.money * building.used_workplaces > building.money + building.money_production) {
             throw new ErrorResponse("Building doesn't have enough money");
         }
     });
