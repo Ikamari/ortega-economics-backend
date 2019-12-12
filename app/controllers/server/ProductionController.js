@@ -13,10 +13,11 @@ class ProductionController extends ServerController {
     createRoutes() {
         this.router.get("/force-production-cycle/building/:id", wrap(async(request, response, next) => {
             const building = model("Building").findById(request.params.id)
-                    if (!building) return response.status(404).send(`Can't find specified building`);
-                    Production.handleBuilding(building)
-                        .then(() => response.status(200).send("Ok!"))
-                        .catch(error => next(error));
+            if (!building) return response.status(404).send(`Can't find specified building`);
+            
+            Production.handleBuilding(building)
+                .then(() => response.status(200).send("Ok!"))
+                .catch(error => next(error));
         }));
 
         this.router.get("/force-production-cycle/fraction/:id", wrap(async(request, response, next) => {

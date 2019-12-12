@@ -6,20 +6,18 @@ const { mergeResources } = require("../helpers/ResourcesHelper");
 const ErrorResponse = require("@controllers/ErrorResponse");
 
 const handleBuilding = async (building, waterID, foodID) => {
+    // Calculate building efficiency
+    const efficiency = ((building.used_workplaces + building.used_workplaces_by_phantoms) / building.available_workplaces);
+
     if (!building.is_active) {
         throw new ErrorResponse("Building is not active");
     }
     if (building.used_storage >= building.storage_size) {
         throw new ErrorResponse("Building doesn't have any space in storage");
     }
-    building.workers_consumption.map((consumption) => {
-        if(consumption.money * building.used_workplaces > building.money + building.money_production) {
-            throw new ErrorResponse("Building doesn't have enough money");
-        }
-    });
-
-    // Calculate building efficiency
-    const efficiency = ((building.used_workplaces + building.used_workplaces_by_phantoms) / building.available_workplaces);
+    if(building.money_consumption * building.used_workplaces > building.money + Math.floor(building.money_production * efficiency)) {
+        throw new ErrorResponse("Building doesn't have enough money");
+    }
 
     // Count how much resources will be consumed by the building
     let resourcesToConsume = {};
@@ -37,19 +35,17 @@ const handleBuilding = async (building, waterID, foodID) => {
     });
     
     // Count non-phantom workers' neccesity and money consumption
-    building.workers_consumption.map((consumption) => {
-        building.money += -(consumption.money * building.used_workplaces) + building.money_production;
+    building.money += -(building.money_consumption * building.used_workplaces) + Math.floor(building.money_production * efficiency);
         
-        resourcesToConsume[waterID] = {
-            _id: waterID,
-            amount: -(consumption.water * building.used_workplaces)
-        };
+    resourcesToConsume[waterID] = {
+        _id: waterID,
+        amount: -(building.water_consumption * building.used_workplaces)
+    };
 
-        resourcesToConsume[foodID] = {
-            _id: foodID,
-            amount: -(consumption.food * building.used_workplaces)
-        };
-    });
+    resourcesToConsume[foodID] = {
+        _id: foodID,
+        amount: -(building.food_consumption * building.used_workplaces)
+    };
 
     resourcesToConsume = Object.values(resourcesToConsume);
 
@@ -75,17 +71,15 @@ const handleBuilding = async (building, waterID, foodID) => {
 };
 
 const handleBuildings = async(buildings, throwException = false) => {   
-    let waterID, foodID;
+    
     const water = await model("Resource").findOne({ name: "Вода" });
+    if (!water) throw new Error("Water resource record was not found");
+    
     const food = await model("Resource").findOne({ name: "Пища" });
-
-    if(water) waterID = water._id;
-    else new(Error("No water model."))
-    if(food) foodID = food._id;
-    else new(Error("No food model."))
+    if (!food) throw new Error("Food resource record was not found");
 
     return Promise.all(buildings.map(((building) => {
-        return handleBuilding(building, waterID, foodID)
+        return handleBuilding(building, water._id, food._id)
             .then(() => {
                 console.log(`Successfully finished production cycle for building ${building._id}`);
             })

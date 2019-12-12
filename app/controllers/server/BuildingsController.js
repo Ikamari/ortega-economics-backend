@@ -37,9 +37,9 @@ class BuildingsController extends ServerController {
             body("money").isInt({ min: 0 }).optional(),
             body("workers_count").isInt({ min: 0 }).optional(),
             body("phantom_workers_count").isInt({ min: 0 }).optional(),
-            body("workers_food_consumption").isInt({ min: 0 }).optional(),
-            body("workers_water_consumption").isInt({ min: 0 }).optional(),
-            body("workers_money_consumption").isInt({ min: 0 }).optional()
+            body("food_consumption").isInt({ min: 0 }).optional(),
+            body("water_consumption").isInt({ min: 0 }).optional(),
+            body("money_consumption").isInt({ min: 0 }).optional()
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
             
@@ -55,7 +55,9 @@ class BuildingsController extends ServerController {
                 defense_level:               request.body.defense_level,
                 money_production:            request.body.money_production,
                 money:                       request.body.money,
-                workers_consumption:         { food: request.body.workers_food_consumption, water: request.body.workers_water_consumption, money: request.body.workers_money_consumption }
+                food_consumption:            request.body.food_consumption,
+                water_consumption:           request.body.water_consumption,
+                money_consumption:           request.body.money_consumption
             });
             return response.status(200).send(building);
         }));
@@ -73,9 +75,9 @@ class BuildingsController extends ServerController {
             body("money").isInt({ min: 0 }).optional(),
             body("workers_count").isInt({ min: 0 }).optional(),
             body("phantom_workers_count").isInt({ min: 0 }).optional(),
-            body("workers_food_consumption").isInt({ min: 0 }).optional(),
-            body("workers_water_consumption").isInt({ min: 0 }).optional(),
-            body("workers_money_consumption").isInt({ min: 0 }).optional()
+            body("food_consumption").isInt({ min: 0 }).optional(),
+            body("water_consumption").isInt({ min: 0 }).optional(),
+            body("money_consumption").isInt({ min: 0 }).optional()
         ],  wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
@@ -99,12 +101,9 @@ class BuildingsController extends ServerController {
             this.updateIfDefined(building, "money", request.body.money);
             this.updateIfDefined(building, "used_workplaces", request.body.workers_count);
             this.updateIfDefined(building, "used_workplaces_by_phantoms", request.body.phantom_workers_count);
-            
-            building.workers_consumption.map((consumption) => {
-                if(request.body.workers_food_consumption) consumption.food = request.body.workers_food_consumption;
-                if(request.body.workers_water_consumption) consumption.water = request.body.workers_water_consumption;
-                if(request.body.workers_money_consumption) consumption.money = request.body.workers_money_consumption;
-            })
+            this.updateIfDefined(building, "food_consumption", request.body.food_consumption);
+            this.updateIfDefined(building, "water_consumption", request.body.water_consumption);
+            this.updateIfDefined(building, "money_consumption", request.body.money_consumption);
 
             await building.save();
             return response.status(200).send(building);
@@ -232,6 +231,24 @@ class BuildingsController extends ServerController {
             await building.removeConsumption(request.params.consumption_id);
             return response.status(200).send(true);
         }));
+
+        // Get building's current resources
+        this.router.get("/:building_id/resources", wrap (async (request, response, next) => {
+            const building = await model("Building").findById(request.params.building_id).select("resources");
+            if (!building) return response.status(404).send("Not found");
+            
+            let resourceIterator = building.resources.keys();
+            let i = 0;
+
+            building.resources.forEach(async(item) => {
+                const resource = await model("Resource").findById(resourceIterator.next().value);
+                await building.resources.set(resource.name, item);
+                await building.resources.delete(resource._id.toString());
+                i++;
+                if(i == building.resources.size) return response.status(200).send(building)
+            });       
+        }));
+
 
         // Increase/decrease amount of resources in building
         this.router.patch("/:building_id/resources", [
