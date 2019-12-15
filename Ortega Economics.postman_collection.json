@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "017bc4e0-f023-4754-8046-22be870c5637",
+		"_postman_id": "7ddcd011-f42d-470e-ad05-044361c82617",
 		"name": "Ortega Economics",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2232,7 +2232,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\": \"\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"energy_production\": 0,\n\t\"production_priority\": 0,\n\t\"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
+									"raw": "{\n\t\"name\": \"\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"energy_production\": 0,\n\t\"money_production\": 0,\n\t\"money\": 0,\n\t\"workers_count\": 0,\n\t\"phantom_workers_count\": 0,\n\t\"workplace_food_consumption\": 0,\n\t\"workplace_water_consumption\": 0,\n\t\"workplace_money_consumption\": 0,\n\t\"production_priority\": 0,\n\t\"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
 								},
 								"url": {
 									"raw": "{{server_url}}/server/buildings",
@@ -2261,7 +2261,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\": \"\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"energy_production\": 0,\n\t\"production_priority\": 0,\n\t\"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
+									"raw": "{\n\t\"name\": \"\",\n\t\"available_workplaces\": 0,\n\t\"storage_size\": 0,\n\t\"energy_production\": 0,\n\t\"money_production\": 0,\n\t\"money\": 0,\n\t\"workers_count\": 0,\n\t\"phantom_workers_count\": 0,\n\t\"workplace_food_consumption\": 0,\n\t\"workplace_water_consumption\": 0,\n\t\"workplace_money_consumption\": 0,\n\t\"production_priority\": 0,\n\t\"storage_priority\": 0,\n\t\"defense_level\": 0\n}"
 								},
 								"url": {
 									"raw": "{{server_url}}/server/buildings/{{building_id}}",
@@ -2302,7 +2302,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{server_url}}/server/buildings/{{building_id}}/has-access",
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/has-access?character_id={{character_id}}",
 									"host": [
 										"{{server_url}}"
 									],
@@ -2311,6 +2311,12 @@
 										"buildings",
 										"{{building_id}}",
 										"has-access"
+									],
+									"query": [
+										{
+											"key": "character_id",
+											"value": "{{character_id}}"
+										}
 									]
 								}
 							},
@@ -2393,6 +2399,40 @@
 										"buildings",
 										"{{building_id}}",
 										"owner"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get building's current resources",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"resources"
 									]
 								}
 							},
@@ -2547,7 +2587,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"resources\": [\n\t]\n}"
+									"raw": "{\n\t\"resource_id\": \"\",\n\t\"amount\": 0\n}"
 								},
 								"url": {
 									"raw": "{{server_url}}/server/buildings/{{building_id}}/resource",
@@ -2605,6 +2645,40 @@
 							"response": []
 						},
 						{
+							"name": "Get building's current facilities",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/facilities",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"buildings",
+										"{{building_id}}",
+										"facilities"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Add facility to the building",
 							"request": {
 								"method": "POST",
@@ -2641,7 +2715,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{server_url}}/server/buildings/{{building_id}}/facility/{{facility_entity_id}}",
+									"raw": "{{server_url}}/server/buildings/{{building_id}}/facilities/{{facility_entity_id}}",
 									"host": [
 										"{{server_url}}"
 									],
@@ -2649,7 +2723,7 @@
 										"server",
 										"buildings",
 										"{{building_id}}",
-										"facility",
+										"facilities",
 										"{{facility_entity_id}}"
 									]
 								}
@@ -3010,16 +3084,9 @@
 					"item": [
 						{
 							"name": "Get all recipes",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"method": "GET",
 								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"quality\": 1\n}"
-								},
 								"url": {
 									"raw": "{{server_url}}/server/recipes/",
 									"host": [
@@ -3036,16 +3103,9 @@
 						},
 						{
 							"name": "Get recipe info by id",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"method": "GET",
 								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{server_url}}/server/recipes/{{recipe_id}}",
 									"host": [
@@ -3068,29 +3128,10 @@
 					"name": "Blueprints",
 					"item": [
 						{
-							"name": "Get all blueprints or entities",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
+							"name": "Get all blueprints",
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"entities\": false\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": {
 									"raw": "{{server_url}}/server/blueprints/",
 									"host": [
@@ -3106,7 +3147,7 @@
 							"response": []
 						},
 						{
-							"name": "Get blueprint info by ID",
+							"name": "Get blueprint info",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -3125,12 +3166,12 @@
 							"response": []
 						},
 						{
-							"name": "Get blueprint entity info",
+							"name": "Get blueprint entities",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/{{entity_id}}",
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/entities",
 									"host": [
 										"{{server_url}}"
 									],
@@ -3138,6 +3179,27 @@
 										"server",
 										"blueprints",
 										"{{blueprint_id}}",
+										"entities"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get blueprint entitity info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/entities/{{entity_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"blueprints",
+										"{{blueprint_id}}",
+										"entities",
 										"{{entity_id}}"
 									]
 								}
@@ -3158,15 +3220,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"quality\": {{quality}}\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+									"raw": "{\n\t\"quality\": {{quality}}\n}"
 								},
 								"url": {
-									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/",
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/entities",
 									"host": [
 										"{{server_url}}"
 									],
@@ -3174,14 +3231,14 @@
 										"server",
 										"blueprints",
 										"{{blueprint_id}}",
-										""
+										"entities"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "Edit blueprint entity quality by ID",
+							"name": "Edit blueprint entity quality",
 							"request": {
 								"method": "PATCH",
 								"header": [
@@ -3194,15 +3251,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"quality\": {{quality}}\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+									"raw": "{\n\t\"quality\": {{quality}}\n}"
 								},
 								"url": {
-									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/{{entity_id}}/",
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/entities/{{entity_id}}",
 									"host": [
 										"{{server_url}}"
 									],
@@ -3210,8 +3262,8 @@
 										"server",
 										"blueprints",
 										"{{blueprint_id}}",
-										"{{entity_id}}",
-										""
+										"entities",
+										"{{entity_id}}"
 									]
 								}
 							},
@@ -3223,7 +3275,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/{{entity_id}}",
+									"raw": "{{server_url}}/server/blueprints/{{blueprint_id}}/entities/{{entity_id}}",
 									"host": [
 										"{{server_url}}"
 									],
@@ -3231,7 +3283,52 @@
 										"server",
 										"blueprints",
 										"{{blueprint_id}}",
+										"entities",
 										"{{entity_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Resources",
+					"item": [
+						{
+							"name": "Get list of resources",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/resources",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"resources"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get resource info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server_url}}/server/resources/{{resource_id}}",
+									"host": [
+										"{{server_url}}"
+									],
+									"path": [
+										"server",
+										"resources",
+										"{{resource_id}}"
 									]
 								}
 							},

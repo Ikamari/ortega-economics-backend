@@ -6,8 +6,9 @@ const { mergeResources } = require("../helpers/ResourcesHelper");
 const ErrorResponse = require("@controllers/ErrorResponse");
 
 const handleBuilding = async (building, waterID, foodID) => {
-    // Calculate building efficiency
+    // Calculate building efficiency and total money production
     const efficiency = ((building.used_workplaces + building.used_workplaces_by_phantoms) / building.available_workplaces);
+    const moneyProduction = (building.workplace_money_consumption * building.used_workplaces) + Math.floor(building.money_production * efficiency);   
 
     if (!building.is_active) {
         throw new ErrorResponse("Building is not active");
@@ -15,9 +16,22 @@ const handleBuilding = async (building, waterID, foodID) => {
     if (building.used_storage >= building.storage_size) {
         throw new ErrorResponse("Building doesn't have any space in storage");
     }
-    if(building.money_consumption * building.used_workplaces > building.money + Math.floor(building.money_production * efficiency)) {
+    if(moneyProduction < 0) {
         throw new ErrorResponse("Building doesn't have enough money");
     }
+       
+    // Count non-phantom workers' neccesity and money consumption
+    building.money += moneyProduction;
+        
+    resourcesToConsume[waterID] = {
+        _id: waterID,
+        amount: -(building.workplace_water_consumption * building.used_workplaces)
+    };
+
+    resourcesToConsume[foodID] = {
+        _id: foodID,
+        amount: -(building.workplace_food_consumption * building.used_workplaces)
+    };
 
     // Count how much resources will be consumed by the building
     let resourcesToConsume = {};
@@ -33,19 +47,6 @@ const handleBuilding = async (building, waterID, foodID) => {
             };
         }
     });
-    
-    // Count non-phantom workers' neccesity and money consumption
-    building.money += -(building.money_consumption * building.used_workplaces) + Math.floor(building.money_production * efficiency);
-        
-    resourcesToConsume[waterID] = {
-        _id: waterID,
-        amount: -(building.water_consumption * building.used_workplaces)
-    };
-
-    resourcesToConsume[foodID] = {
-        _id: foodID,
-        amount: -(building.food_consumption * building.used_workplaces)
-    };
 
     resourcesToConsume = Object.values(resourcesToConsume);
 

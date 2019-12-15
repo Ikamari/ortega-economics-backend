@@ -70,17 +70,17 @@ const BuildingSchema = new Schema({
         required: true,
         default: 0
     },
-    food_consumption: {
+    workplace_food_consumption: {
         type: Int32,
         required: true,
         default: 1
     },
-    water_consumption: {
+    workplace_water_consumption: {
         type: Int32,
         required: true,
         default: 1
     },
-    money_consumption: {
+    workplace_money_consumption: {
         type: Int32,
         required: true,
         default: 0
