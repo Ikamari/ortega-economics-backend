@@ -2,6 +2,8 @@
 const ServerController = require("../ServerController");
 const { wrap } = require("../Controller");
 const { query, body } = require('express-validator');
+// Helpers
+const { getRecordsMap } = require("../../helpers/ModelsHelper");
 // Database
 const { model } = require("mongoose");
 
@@ -32,18 +34,32 @@ class BuildingsController extends ServerController {
             body("energy_production").isInt({ min: 0 }).optional(),
             body("production_priority").isInt().optional(),
             body("storage_priority").isInt().optional(),
-            body("defense_level").isInt({ min: 0 }).optional()
+            body("defense_level").isInt({ min: 0 }).optional(),
+            body("money_production").isInt().optional(), 
+            body("money").isInt({ min: 0 }).optional(),
+            body("workers_count").isInt({ min: 0 }).optional(),
+            body("phantom_workers_count").isInt({ min: 0 }).optional(),
+            body("workplace_food_consumption").isInt({ min: 0 }).optional(),
+            body("workplace_water_consumption").isInt({ min: 0 }).optional(),
+            body("workplace_money_consumption").isInt({ min: 0 }).optional()
         ], wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
-
+            
             const building = await model("Building").create({
-                name:                 request.body.name,
-                available_workplaces: request.body.available_workplaces,
-                storage_size:         request.body.storage_size,
-                energy_production:    request.body.energy_production,
-                production_priority:  request.body.production_priority,
-                storage_priority:     request.body.storage_priority,
-                defense_level:        request.body.defense_level
+                name:                        request.body.name,
+                available_workplaces:        request.body.available_workplaces,
+                used_workplaces:             request.body.workers_count,
+                used_workplaces_by_phantoms: request.body.phantom_workers_count,
+                storage_size:                request.body.storage_size,
+                energy_production:           request.body.energy_production,
+                production_priority:         request.body.production_priority,
+                storage_priority:            request.body.storage_priority,
+                defense_level:               request.body.defense_level,
+                money_production:            request.body.money_production,
+                money:                       request.body.money,
+                workplace_food_consumption:  request.body.workplace_food_consumption,
+                workplace_water_consumption: request.body.workplace_water_consumption,
+                workplace_money_consumption: request.body.workplace_money_consumption
             });
             return response.status(200).send(building);
         }));
@@ -56,7 +72,14 @@ class BuildingsController extends ServerController {
             body("energy_production").isInt({ min: 0 }).optional(),
             body("production_priority").isInt().optional(),
             body("storage_priority").isInt().optional(),
-            body("defense_level").isInt({ min: 0 }).optional()
+            body("defense_level").isInt({ min: 0 }).optional(),
+            body("money_production").isInt().optional(),
+            body("money").isInt({ min: 0 }).optional(),
+            body("workers_count").isInt({ min: 0 }).optional(),
+            body("phantom_workers_count").isInt({ min: 0 }).optional(),
+            body("workplace_food_consumption").isInt({ min: 0 }).optional(),
+            body("workplace_water_consumption").isInt({ min: 0 }).optional(),
+            body("workplace_money_consumption").isInt({ min: 0 }).optional()
         ],  wrap(async (request, response, next) => {
             if (!this.validate(request, next)) return;
 
@@ -76,8 +99,15 @@ class BuildingsController extends ServerController {
             this.updateIfDefined(building, "production_priority", request.body.production_priority);
             this.updateIfDefined(building, "storage_priority", request.body.storage_priority);
             this.updateIfDefined(building, "defense_level", request.body.defense_level);
-            await building.save();
+            this.updateIfDefined(building, "money_production", request.body.money_production);
+            this.updateIfDefined(building, "money", request.body.money);
+            this.updateIfDefined(building, "used_workplaces", request.body.workers_count);
+            this.updateIfDefined(building, "used_workplaces_by_phantoms", request.body.phantom_workers_count);
+            this.updateIfDefined(building, "workplace_food_consumption", request.body.workplace_food_consumption);
+            this.updateIfDefined(building, "workplace_water_consumption", request.body.workplace_water_consumption);
+            this.updateIfDefined(building, "workplace_money_consumption", request.body.workplace_money_consumption);
 
+            await building.save();
             return response.status(200).send(building);
         }));
 
@@ -204,6 +234,22 @@ class BuildingsController extends ServerController {
             return response.status(200).send(true);
         }));
 
+        // Get building's current resources
+        this.router.get("/:building_id/resources", wrap (async (request, response, next) => {
+            const building = await model("Building").findById(request.params.building_id);
+            if (!building) return response.status(404).send("Not found");
+
+            const recordsMap = await getRecordsMap("Resource", "_id");
+            let resources = {};
+
+            building.resources.forEach((value, key) => {
+                resources[recordsMap[key].name] = value;
+            });
+            
+            return response.status(200).send(resources);
+        }));
+
+
         // Increase/decrease amount of resources in building
         this.router.patch("/:building_id/resources", [
             body("resources", "Invalid array of objects")
@@ -262,6 +308,30 @@ class BuildingsController extends ServerController {
             return response.status(200).send(true);
         }));
 
+        // Get building's current facilities
+        this.router.get("/:building_id/facilities", wrap (async (request, response, next) => {
+            const building = await model("Building").findById(request.params.building_id);
+            if (!building) return response.status(404).send("Not found");
+
+            const facilityRecordsMap = await getRecordsMap("Facility", "_id");
+            const entityRecordsMap = await getRecordsMap("FacilityType", "_id");
+            let facilities = {};
+
+            building.facilities.forEach((item) => {
+                const facility = facilityRecordsMap[item.facility_id.toString()];
+
+                facilities[item._id] = {
+                    "name":               facility.name,
+                    "energy_consumption": facility.energy_consumption,
+                    "tech_tier":          facility.tech_tier,
+                    "type":               entityRecordsMap[facility.type_id].name,
+                    "is_free":            building.free_facilities.includes(item) | false
+                };
+            });
+            
+            return response.status(200).send(facilities);
+        }));
+        
         // Add facility to the building
         this.router.post("/:building_id/facilities", [
             body("facility_id").isString().exists({ checkFalsy: true })
